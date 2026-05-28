@@ -296,6 +296,25 @@
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast.success { border-color: var(--accent2); color: var(--accent2); }
     .toast.error   { border-color: var(--danger);  color: var(--danger); }
+
+    /* ===== เพิ่ม CSS สำหรับหน้าประวัติ (History) ===== */
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .history-left { display: flex; flex-direction: column; gap: 4px; }
+    .history-date { font-size: 12px; color: var(--text-muted); }
+    .history-action { font-size: 15px; font-weight: 600; }
+    .history-right { text-align: right; }
+    .history-time { font-size: 18px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+    .history-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+    .history-status.ok { background: rgba(126,200,160,0.15); color: var(--accent2); }
+    .history-status.fail { background: rgba(224,92,92,0.15); color: var(--danger); }
   </style>
 </head>
 <body>
@@ -323,7 +342,7 @@
   <div class="container">
 
     <!-- Main Menu -->
-    <div id="mainMenu" class="section">
+    <div id="mainMenu" class="section active"> <!-- เติม active ให้เมนูหลักแสดงตอนแรก -->
       <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
       <div class="menu-grid">
         <div class="menu-card green" onclick="showSection('checkinSec')">
@@ -357,7 +376,9 @@
             <div class="menu-desc">ถ่ายภาพรายงานพิกัดระหว่างวัน</div>
           </div>
           <div class="menu-arrow">›</div>
-         <div class="menu-card blue" onclick="fetchHistory()">
+        </div>
+        <!-- เพิ่มปุ่มประวัติของฉัน ให้อยู่ในกรอบเมนู -->
+        <div class="menu-card blue" onclick="fetchHistory()">
           <div class="menu-icon blue">🕒</div>
           <div class="menu-info">
             <div class="menu-label">ประวัติของฉัน</div>
@@ -365,16 +386,16 @@
           </div>
           <div class="menu-arrow">›</div>
         </div>
-          <!-- History Section -->
+      </div>
+    </div>
+
+    <!-- History Section (แยกออกมาอยู่นอกเมนูหลัก) -->
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา (15 รายการล่าสุด)</div>
       <div id="historyList" style="display:flex; flex-direction:column; gap:10px;">
         <!-- ประวัติจะถูกนำมาแสดงตรงนี้ผ่าน Javascript -->
       </div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('historySec')">← กลับเมนูหลัก</button>
-    </div>
-        </div>
-      </div>
     </div>
 
     <!-- Check-in / Check-out -->
@@ -507,6 +528,9 @@
         document.getElementById('issueImgInput').value = "";
         resetUpload('issueUpload', 'issuePreview');
       }
+      if (fromSection === 'historySec') {
+        document.getElementById('historyList').innerHTML = ""; // ล้างข้อมูลประวัติเมื่อกดกลับ
+      }
       showSection('mainMenu');
     }
 
@@ -515,18 +539,15 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      // --- [เริ่ม] เพิ่มการตรวจสอบ Metadata เวลาของไฟล์ ---
       const currentTime = new Date().getTime();
-      const fileTime = file.lastModified; // ดึงเวลาที่สร้าง/แก้ไขไฟล์ล่าสุด
+      const fileTime = file.lastModified; 
       const diffMinutes = Math.abs(currentTime - fileTime) / (1000 * 60);
 
-      // ถ้ารูปถ่ายไว้เกิน 5 นาที ให้แจ้งเตือนและยกเลิกการทำงาน
       if (diffMinutes > 5) {
         showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพใหม่เดี๋ยวนี้ ❌", "error");
-        e.target.value = ""; // รีเซ็ต input เพื่อให้ต้องเลือกใหม่
+        e.target.value = ""; 
         return;
       }
-      // --- [จบ] การตรวจสอบ Metadata ---
 
       const reader = new FileReader();
       reader.onload = function(ev) {
@@ -540,7 +561,6 @@
           canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
           const b64 = canvas.toDataURL('image/jpeg', 0.72);
 
-          // บันทึก b64 ลง key ที่ถูกต้อง
           if (previewId === 'checkinPreview') {
             imageB64.checkin = b64;
             document.getElementById('btnIn').disabled  = false;
@@ -552,7 +572,6 @@
             imageB64.issue = b64;
           }
 
-          // แสดง preview
           var inputId = previewId === 'checkinPreview' ? 'cameraInput'
                       : previewId === 'spotPreview'    ? 'spotImgInput'
                       : 'issueImgInput';
@@ -663,6 +682,60 @@
         hideLoading();
         submitting = false;
         showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
+      });
+    }
+
+    // ===== เพิ่มฟังก์ชันดึงประวัติ (History) =====
+    function fetchHistory() {
+      showLoading("กำลังโหลดประวัติ...");
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ userId: profile.userId, type: 'get_history' })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        hideLoading();
+        if (res.success) {
+          renderHistory(res.history);
+          showSection('historySec');
+        } else {
+          showToast("ไม่สามารถดึงข้อมูลได้", "error");
+        }
+      })
+      .catch(function(err) {
+        hideLoading();
+        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
+      });
+    }
+
+    function renderHistory(data) {
+      var container = document.getElementById('historyList');
+      container.innerHTML = ""; // ล้างของเก่า
+      
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">ยังไม่มีประวัติการลงเวลา</div>';
+        return;
+      }
+
+      data.forEach(function(item) {
+        // กำหนดสีและไอคอนตามการกระทำ
+        var actionColor = item.action === 'เข้างาน' ? 'var(--accent2)' : 'var(--danger)';
+        var statusClass = item.status === 'สำเร็จ' ? 'ok' : 'fail';
+        
+        var html = `
+          <div class="history-card">
+            <div class="history-left">
+              <div class="history-date">📅 ${item.date}</div>
+              <div class="history-action" style="color: ${actionColor}">${item.action}</div>
+            </div>
+            <div class="history-right">
+              <div class="history-time">${item.time}</div>
+              <div class="history-status ${statusClass}">${item.status}</div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += html;
       });
     }
 
