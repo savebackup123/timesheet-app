@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ระบบจัดการเวลาทำงาน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    :root {
+      --bg:        #0d0f14;
+      --surface:   #161a23;
+      --surface2:  #1e2433;
+      --border:    #2a3040;
+      --accent:    #4f9eff;
+      --accent2:   #7ec8a0;
+      --warn:      #f5a623;
+      --danger:    #e05c5c;
+      --text:      #e8edf5;
+      --text-muted:#7a8499;
+      --radius:    14px;
+      --font:      'IBM Plex Sans Thai', sans-serif;
+      --mono:      'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 40px;
+      overflow-x: hidden;
+    }
+
+    .header {
+      width: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .header-text { flex: 1; }
+    .header-title { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
+    .header-sub   { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-top: 1px; }
+
+    .status-bar {
+      width: 100%;
+      max-width: 420px;
+      margin: 20px 20px 0;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+      box-shadow: 0 0 6px var(--accent2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-dot.loading { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+    .status-dot.error   { background: var(--danger); box-shadow: 0 0 6px var(--danger); animation: none; }
+    @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 0 16px;
+      margin-top: 16px;
+    }
+
+    .section { display: none; animation: fadeUp 0.25s ease; }
+    .section.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(12px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 3px; height: 14px;
+      border-radius: 2px;
+      background: var(--accent);
+    }
+
+    .menu-grid { display: flex; flex-direction: column; gap: 10px; }
+    .menu-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menu-card:active { transform: scale(0.98); }
+    .menu-card:hover  { border-color: var(--accent); background: var(--surface2); }
+    .menu-card.green:hover  { border-color: var(--accent2); }
+    .menu-card.orange:hover { border-color: var(--warn); }
+    .menu-card.red:hover    { border-color: var(--danger); }
+
+    .menu-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .menu-icon.green  { background: rgba(126,200,160,0.12); }
+    .menu-icon.blue   { background: rgba(79,158,255,0.12); }
+    .menu-icon.orange { background: rgba(245,166,35,0.12); }
+    .menu-icon.red    { background: rgba(224,92,92,0.12); }
+
+    .menu-info { flex: 1; }
+    .menu-label { font-size: 15px; font-weight: 600; }
+    .menu-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .menu-arrow { color: var(--text-muted); font-size: 18px; }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    select, textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+    select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: var(--surface2); }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 14px;
+    }
+    .upload-area:hover { border-color: var(--accent); background: rgba(79,158,255,0.04); }
+    .upload-area.has-image {
+      padding: 0;
+      border-style: solid;
+      border-color: var(--accent2);
+      overflow: hidden;
+    }
+    .upload-area.has-image img { display: block; width: 100%; border-radius: 12px; }
+    .upload-icon { font-size: 30px; margin-bottom: 8px; }
+    .upload-text { font-size: 14px; font-weight: 500; }
+    .upload-sub  { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .upload-change {
+      display: block;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: -1px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+    .btn-primary  { background: var(--accent);  color: #fff; }
+    .btn-success  { background: var(--accent2); color: #0d1a12; }
+    .btn-warning  { background: var(--warn);    color: #1a1000; }
+    .btn-danger   { background: var(--danger);  color: #fff; }
+    .btn-ghost    { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .note {
+      background: rgba(245,166,35,0.08);
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--warn);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(13,15,20,0.85);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: var(--text-muted); }
+
+    .toast {
+      position: fixed;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      opacity: 0;
+      z-index: 1000;
+      max-width: 90vw;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { border-color: var(--accent2); color: var(--accent2); }
+    .toast.error   { border-color: var(--danger);  color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">กำลังดำเนินการ...</div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="header">
+    <div class="header-icon">⏱</div>
+    <div class="header-text">
+      <div class="header-title">ระบบจัดการเวลาทำงาน</div>
+      <div class="header-sub" id="headerSub">กำลังเชื่อมต่อ...</div>
+    </div>
+  </div>
+
+  <div class="status-bar" style="max-width:420px;width:calc(100% - 32px);">
+    <div class="status-dot loading" id="statusDot"></div>
+    <span id="statusText">กำลังโหลด กรุณารอสักครู่...</span>
+  </div>
+
+  <div class="container">
+
+    <!-- Main Menu -->
+    <div id="mainMenu" class="section">
+      <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
+      <div class="menu-grid">
+        <div class="menu-card green" onclick="showSection('checkinSec')">
+          <div class="menu-icon green">📸</div>
+          <div class="menu-info">
+            <div class="menu-label">ลงเวลาเข้า-ออก</div>
+            <div class="menu-desc">ถ่ายภาพ + ตรวจสอบ GPS</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-card orange" onclick="showSection('leaveSec')">
+          <div class="menu-icon orange">📝</div>
+          <div class="menu-info">
+            <div class="menu-label">แจ้งลางาน</div>
+            <div class="menu-desc">ลาป่วย / ลากิจ / ลาพักร้อน</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-card red" onclick="showSection('reportSec')">
+          <div class="menu-icon red">⚠️</div>
+          <div class="menu-info">
+            <div class="menu-label">แจ้งปัญหาเวลา</div>
+            <div class="menu-desc">ส่งรายงานไปผู้บริหาร</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-card blue" onclick="showSection('spotSec')">
+          <div class="menu-icon blue">🎯</div>
+          <div class="menu-info">
+            <div class="menu-label">ส่งงานสุ่มตรวจ</div>
+            <div class="menu-desc">ถ่ายภาพรายงานพิกัดระหว่างวัน</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Check-in / Check-out -->
+    <div id="checkinSec" class="section">
+      <div class="section-title" style="margin-top:8px">ลงเวลาเข้า-ออก</div>
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none"
+             onchange="handleImage(event,'checkinPreview','checkinUpload')">
+      <div class="upload-area" id="checkinUpload" onclick="document.getElementById('cameraInput').click()">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">ถ่ายภาพสถานที่</div>
+        <div class="upload-sub">แตะเพื่อเปิดกล้อง</div>
+      </div>
+      <img id="checkinPreview" src="" style="display:none">
+      <div class="btn-row">
+        <button id="btnIn"  class="btn btn-success" onclick="submitData('เข้างาน')"  disabled>เข้างาน ✅</button>
+        <button id="btnOut" class="btn btn-danger"  onclick="submitData('ออกงาน')"  disabled>ออกงาน 🔴</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('checkinSec')">← ย้อนกลับ</button>
+    </div>
+
+    <!-- Spot Check -->
+    <div id="spotSec" class="section">
+      <div class="section-title" style="margin-top:8px">ส่งงานสุ่มตรวจ (Spot Check)</div>
+      <input type="file" id="spotImgInput" accept="image/*" capture="environment" style="display:none"
+             onchange="handleImage(event,'spotPreview','spotUpload')">
+      <div class="upload-area" id="spotUpload" onclick="document.getElementById('spotImgInput').click()">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">ถ่ายภาพจุดที่ได้รับมอบหมาย</div>
+        <div class="upload-sub">บังคับเปิดพิกัด GPS ปัจจุบัน</div>
+      </div>
+      <img id="spotPreview" src="" style="display:none">
+      <button id="btnSpot" class="btn btn-primary" onclick="submitSpotCheck()" disabled>ส่งงาน 🎯</button>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('spotSec')">← ย้อนกลับ</button>
+    </div>
+
+    <!-- Leave -->
+    <div id="leaveSec" class="section">
+      <div class="section-title" style="margin-top:8px">แจ้งลางาน</div>
+      <div class="note">⚠️ การลางานในวันที่มีลูกค้าประเมิน จะต้องชดเชยเวลา 2 เท่า</div>
+      <div class="field">
+        <label>ประเภทการลา</label>
+        <select id="leaveType">
+          <option value="ลาป่วย">🤒 ลาป่วย</option>
+          <option value="ลากิจ">📋 ลากิจ</option>
+          <option value="ลาพักร้อน">🌴 ลาพักร้อน</option>
+        </select>
+      </div>
+      <button class="btn btn-warning" onclick="submitLeave()">ส่งคำขอลา 📝</button>
+      <button class="btn btn-ghost"   onclick="goBack('leaveSec')">← ย้อนกลับ</button>
+    </div>
+
+    <!-- Report Issue -->
+    <div id="reportSec" class="section">
+      <div class="section-title" style="margin-top:8px">แจ้งปัญหาเวลา</div>
+      <div class="field">
+        <label>รายละเอียดปัญหา</label>
+        <textarea id="issueText" rows="4" placeholder="ระบุปัญหาที่ต้องการแจ้ง เช่น ลืมบันทึก, ระบบขัดข้อง..."></textarea>
+      </div>
+      <input type="file" id="issueImgInput" accept="image/*" style="display:none"
+             onchange="handleImage(event,'issuePreview','issueUpload')">
+      <div class="upload-area" id="issueUpload" onclick="document.getElementById('issueImgInput').click()">
+        <div class="upload-icon">🖼</div>
+        <div class="upload-text">แนบภาพหลักฐาน</div>
+        <div class="upload-sub">ไม่บังคับ — แตะเพื่อเลือกภาพ</div>
+      </div>
+      <img id="issuePreview" src="" style="display:none">
+      <button class="btn btn-danger"  onclick="submitIssue()">ส่งคำร้อง ⚠️</button>
+      <button class="btn btn-ghost"   onclick="goBack('reportSec')">← ย้อนกลับ</button>
+    </div>
+
+  </div>
+
+  <script>
+    // ===== State =====
+    let profile    = {};
+    let loc        = null;
+    let imageB64   = { checkin: "", spot: "", issue: "" };
+    let submitting = false;
+
+   // ===== Init LIFF =====
+async function init() {
+  try {
+    alert("step1");
+    await liff.init({ liffId: "2010215863-7qiQMJWd" });
+    alert("step2");
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    alert("step3");
+    profile = await liff.getProfile();
+    alert("step4: " + profile.displayName);
+
+    document.getElementById('headerSub').textContent = profile.displayName;
+
+    setStatus("loading", "กำลังรับตำแหน่ง GPS...");
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
+        showSection('mainMenu');
+      },
+      err => {
+        const msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
+        setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
+        showSection('mainMenu');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  } catch (e) {
+    alert("ERROR: " + e.message);
+    setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
+  }
+}
+
+    // ===== Section nav =====
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function goBack(fromSection) {
+      if (fromSection === 'checkinSec') {
+        imageB64.checkin = "";
+        document.getElementById('cameraInput').value = "";
+        resetUpload('checkinUpload', 'checkinPreview');
+        document.getElementById('btnIn').disabled  = true;
+        document.getElementById('btnOut').disabled = true;
+      }
+      if (fromSection === 'spotSec') {
+        imageB64.spot = "";
+        document.getElementById('spotImgInput').value = "";
+        resetUpload('spotUpload', 'spotPreview');
+        document.getElementById('btnSpot').disabled = true;
+      }
+      if (fromSection === 'reportSec') {
+        imageB64.issue = "";
+        document.getElementById('issueImgInput').value = "";
+        resetUpload('issueUpload', 'issuePreview');
+      }
+      showSection('mainMenu');
+    }
+
+    // ===== Image handling =====
+    function handleImage(e, previewId, uploadId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = new Image();
+        img.onload = function() {
+          const MAX_W  = 800;
+          const scale  = Math.min(1, MAX_W / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.round(img.width  * scale);
+          canvas.height = Math.round(img.height * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          const b64 = canvas.toDataURL('image/jpeg', 0.72);
+
+          // บันทึก b64 ลง key ที่ถูกต้อง
+          if (previewId === 'checkinPreview') {
+            imageB64.checkin = b64;
+            document.getElementById('btnIn').disabled  = false;
+            document.getElementById('btnOut').disabled = false;
+          } else if (previewId === 'spotPreview') {
+            imageB64.spot = b64;
+            document.getElementById('btnSpot').disabled = false;
+          } else {
+            imageB64.issue = b64;
+          }
+
+          // แสดง preview
+          var inputId = previewId === 'checkinPreview' ? 'cameraInput'
+                      : previewId === 'spotPreview'    ? 'spotImgInput'
+                      : 'issueImgInput';
+          var uploadEl = document.getElementById(uploadId);
+          uploadEl.classList.add('has-image');
+          uploadEl.innerHTML = '<img src="' + b64 + '"><span class="upload-change">📷 เปลี่ยนภาพ</span>';
+          uploadEl.onclick = (function(inp) {
+            return function() { document.getElementById(inp).click(); };
+          })(inputId);
+          document.getElementById(previewId).src = b64;
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetUpload(uploadId, previewId) {
+      var el      = document.getElementById(uploadId);
+      var isCheckin = uploadId === 'checkinUpload';
+      var isSpot    = uploadId === 'spotUpload';
+      var icon = (isCheckin || isSpot) ? '📷' : '🖼';
+      var text = isCheckin ? 'ถ่ายภาพสถานที่'
+               : isSpot    ? 'ถ่ายภาพจุดที่ได้รับมอบหมาย'
+               : 'แนบภาพหลักฐาน';
+      var sub  = (isCheckin || isSpot) ? 'แตะเพื่อเปิดกล้อง' : 'ไม่บังคับ — แตะเพื่อเลือกภาพ';
+      var inp  = isCheckin ? 'cameraInput' : isSpot ? 'spotImgInput' : 'issueImgInput';
+      el.classList.remove('has-image');
+      el.innerHTML = '<div class="upload-icon">' + icon + '</div>'
+                   + '<div class="upload-text">' + text + '</div>'
+                   + '<div class="upload-sub">'  + sub  + '</div>';
+      el.onclick = (function(i) {
+        return function() { document.getElementById(i).click(); };
+      })(inp);
+      document.getElementById(previewId).src = "";
+    }
+
+    // ===== Submit handlers =====
+    function submitData(type) {
+      if (!loc)              { showToast("ไม่พบ GPS — กรุณาเปิดตำแหน่งที่ตั้ง", "error"); return; }
+      if (!imageB64.checkin) { showToast("กรุณาถ่ายภาพก่อนบันทึก", "error"); return; }
+      sendPayload({
+        userId:      profile.userId,
+        displayName: profile.displayName,
+        lat:         loc.lat,
+        lng:         loc.lng,
+        imageB64:    imageB64.checkin,
+        type:        type
+      });
+    }
+
+    function submitSpotCheck() {
+      if (!loc)           { showToast("ไม่พบ GPS", "error"); return; }
+      if (!imageB64.spot) { showToast("ถ่ายภาพก่อนส่ง", "error"); return; }
+      sendPayload({
+        userId:      profile.userId,
+        displayName: profile.displayName,
+        lat:         loc.lat,
+        lng:         loc.lng,
+        imageB64:    imageB64.spot,
+        type:        'spot_check'
+      });
+    }
+
+    function submitLeave() {
+      sendPayload({
+        userId:      profile.userId,
+        displayName: profile.displayName,
+        type:        'leave',
+        leaveType:   document.getElementById('leaveType').value
+      });
+    }
+
+    function submitIssue() {
+      var text = document.getElementById('issueText').value.trim();
+      if (!text) { showToast("กรุณาระบุรายละเอียดปัญหา", "error"); return; }
+      sendPayload({
+        userId:      profile.userId,
+        displayName: profile.displayName,
+        type:        'report_issue',
+        issueText:   text,
+        imageB64:    imageB64.issue
+      });
+    }
+
+    // ===== Core sender =====
+    function sendPayload(payload) {
+      if (submitting) return;
+      submitting = true;
+      showLoading("กำลังดำเนินการ...");
+      google.script.run
+        .withSuccessHandler(function(res) {
+          hideLoading();
+          submitting = false;
+          showToast(res.message, res.success ? "success" : "error");
+          if (res.success) {
+            setTimeout(function() { liff.closeWindow(); }, 2200);
+          }
+        })
+        .withFailureHandler(function(err) {
+          hideLoading();
+          submitting = false;
+          showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
+        })
+        .processAction(payload);
+    }
+
+    // ===== UI helpers =====
+    function setStatus(type, text) {
+      document.getElementById('statusDot').className  = 'status-dot' + (type !== 'ok' ? ' ' + type : '');
+      document.getElementById('statusText').textContent = text;
+    }
+    function showLoading(text) {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+    function showToast(msg, type) {
+      type = type || "success";
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className   = 'toast ' + type + ' show';
+      clearTimeout(el._t);
+      el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
+    }
+
+    // ===== Start =====
+    window.onload = function() {
+  if (typeof liff === 'undefined') {
+    alert("ERROR: liff SDK โหลดไม่สำเร็จ");
+    setStatus("error", "โหลด LIFF SDK ไม่สำเร็จ กรุณารีเฟรช");
+    return;
+  }
+  init();
+};
+  </script>
+</body>
+</html>
