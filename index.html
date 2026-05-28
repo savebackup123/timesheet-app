@@ -438,38 +438,33 @@
     let imageB64   = { checkin: "", spot: "", issue: "" };
     let submitting = false;
 
-   // ===== Init LIFF =====
-async function init() {
-  try {
-    alert("step1");
-    await liff.init({ liffId: "2010215863-7qiQMJWd" });
-    alert("step2");
-    if (!liff.isLoggedIn()) { liff.login(); return; }
-    alert("step3");
-    profile = await liff.getProfile();
-    alert("step4: " + profile.displayName);
+    // ===== Init LIFF =====
+    async function init() {
+      try {
+        await liff.init({ liffId: "2010215863-7qiQMJWd" });
+        if (!liff.isLoggedIn()) { liff.login(); return; }
 
-    document.getElementById('headerSub').textContent = profile.displayName;
+        profile = await liff.getProfile();
+        document.getElementById('headerSub').textContent = profile.displayName;
 
-    setStatus("loading", "กำลังรับตำแหน่ง GPS...");
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
-        showSection('mainMenu');
-      },
-      err => {
-        const msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
-        setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
-        showSection('mainMenu');
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  } catch (e) {
-    alert("ERROR: " + e.message);
-    setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
-  }
-}
+        setStatus("loading", "กำลังรับตำแหน่ง GPS...");
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
+            showSection('mainMenu');
+          },
+          err => {
+            const msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
+            setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
+            showSection('mainMenu');
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      } catch (e) {
+        setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
+      }
+    }
 
     // ===== Section nav =====
     function showSection(id) {
@@ -612,26 +607,33 @@ async function init() {
       });
     }
 
+    // ===== GAS URL — เปลี่ยนเป็น URL /exec ของคุณ =====
+    var GAS_URL = "https://script.google.com/macros/s/AKfycbyLmTGN0TWe6pHZGGeZgMagc7L4RbiyYE9SepSdqp7twLuoSahu7Gzu_C4khbxC8qQ0/exec";
+
     // ===== Core sender =====
     function sendPayload(payload) {
       if (submitting) return;
       submitting = true;
       showLoading("กำลังดำเนินการ...");
-      google.script.run
-        .withSuccessHandler(function(res) {
-          hideLoading();
-          submitting = false;
-          showToast(res.message, res.success ? "success" : "error");
-          if (res.success) {
-            setTimeout(function() { liff.closeWindow(); }, 2200);
-          }
-        })
-        .withFailureHandler(function(err) {
-          hideLoading();
-          submitting = false;
-          showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
-        })
-        .processAction(payload);
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(payload)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        hideLoading();
+        submitting = false;
+        showToast(res.message, res.success ? "success" : "error");
+        if (res.success) {
+          setTimeout(function() { liff.closeWindow(); }, 2200);
+        }
+      })
+      .catch(function(err) {
+        hideLoading();
+        submitting = false;
+        showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
+      });
     }
 
     // ===== UI helpers =====
@@ -656,14 +658,7 @@ async function init() {
     }
 
     // ===== Start =====
-    window.onload = function() {
-  if (typeof liff === 'undefined') {
-    alert("ERROR: liff SDK โหลดไม่สำเร็จ");
-    setStatus("error", "โหลด LIFF SDK ไม่สำเร็จ กรุณารีเฟรช");
-    return;
-  }
-  init();
-};
+    window.onload = init;
   </script>
 </body>
 </html>
