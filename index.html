@@ -498,6 +498,20 @@
     function handleImage(e, previewId, uploadId) {
       const file = e.target.files[0];
       if (!file) return;
+
+      // --- [เริ่ม] เพิ่มการตรวจสอบ Metadata เวลาของไฟล์ ---
+      const currentTime = new Date().getTime();
+      const fileTime = file.lastModified; // ดึงเวลาที่สร้าง/แก้ไขไฟล์ล่าสุด
+      const diffMinutes = Math.abs(currentTime - fileTime) / (1000 * 60);
+
+      // ถ้ารูปถ่ายไว้เกิน 5 นาที ให้แจ้งเตือนและยกเลิกการทำงาน
+      if (diffMinutes > 5) {
+        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพใหม่เดี๋ยวนี้ ❌", "error");
+        e.target.value = ""; // รีเซ็ต input เพื่อให้ต้องเลือกใหม่
+        return;
+      }
+      // --- [จบ] การตรวจสอบ Metadata ---
+
       const reader = new FileReader();
       reader.onload = function(ev) {
         const img = new Image();
