@@ -342,7 +342,7 @@
   <div class="container">
 
     <!-- Main Menu -->
-    <div id="mainMenu" class="section active"> <!-- เติม active ให้เมนูหลักแสดงตอนแรก -->
+    <div id="mainMenu" class="section active">
       <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
       <div class="menu-grid">
         <div class="menu-card green" onclick="showSection('checkinSec')">
@@ -379,7 +379,6 @@
           <div class="menu-arrow">›</div>
         </div>
 
-        <!-- เพิ่มปุ่มประวัติของฉัน ให้อยู่ในกรอบเมนู -->
         <div class="menu-card blue" onclick="fetchHistory()">
           <div class="menu-icon blue">🕒</div>
           <div class="menu-info">
@@ -391,7 +390,7 @@
       </div>
     </div>
 
-    <!-- History Section (แยกออกมาอยู่นอกเมนูหลัก) -->
+    <!-- History Section -->
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา (15 รายการล่าสุด)</div>
       <div id="historyList" style="display:flex; flex-direction:column; gap:10px;">
@@ -491,12 +490,10 @@
           pos => {
             loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
-            showSection('mainMenu');
           },
           err => {
             const msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
             setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
-            showSection('mainMenu');
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
@@ -545,8 +542,9 @@
       const fileTime = file.lastModified; 
       const diffMinutes = Math.abs(currentTime - fileTime) / (1000 * 60);
 
-      if (diffMinutes > 5) {
-        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพใหม่เดี๋ยวนี้ ❌", "error");
+      // ตรวจสอบรูปภาพ ห้ามใช้รูปที่เก่ากว่า 2 นาที
+      if (diffMinutes > 2) {
+        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพผ่านกล้องเดี๋ยวนี้ ❌", "error");
         e.target.value = ""; 
         return;
       }
@@ -693,7 +691,8 @@
       fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ userId: profile.userId, type: 'get_history' })
+        // เพิ่ม displayName ส่งไปด้วยเพื่อความชัวร์ในการเช็คสิทธิ์
+        body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_history' })
       })
       .then(function(r) { return r.json(); })
       .then(function(res) {
@@ -702,7 +701,7 @@
           renderHistory(res.history);
           showSection('historySec');
         } else {
-          showToast("ไม่สามารถดึงข้อมูลได้", "error");
+          showToast(res.message || "ไม่สามารถดึงข้อมูลได้", "error");
         }
       })
       .catch(function(err) {
