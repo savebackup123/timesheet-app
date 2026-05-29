@@ -166,7 +166,7 @@
       text-transform: uppercase;
       margin-bottom: 8px;
     }
-    select, textarea {
+    select, textarea, input[type="date"] {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -179,8 +179,9 @@
       transition: border-color 0.2s;
       resize: none;
     }
-    select:focus, textarea:focus { border-color: var(--accent); }
+    select:focus, textarea:focus, input[type="date"]:focus { border-color: var(--accent); }
     select option { background: var(--surface2); }
+    ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
     .upload-area {
       border: 2px dashed var(--border);
@@ -341,7 +342,6 @@
 
   <div class="container">
 
-    <!-- Main Menu -->
     <div id="mainMenu" class="section active">
       <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
       <div class="menu-grid">
@@ -365,7 +365,7 @@
           <div class="menu-icon red">⚠️</div>
           <div class="menu-info">
             <div class="menu-label">แจ้งปัญหาเวลา</div>
-            <div class="menu-desc">ส่งรายงานไปผู้บริหาร</div>
+            <div class="menu-desc">ส่งรายงานไปให้แอดมิน</div>
           </div>
           <div class="menu-arrow">›</div>
         </div>
@@ -390,16 +390,13 @@
       </div>
     </div>
 
-    <!-- History Section -->
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา (15 รายการล่าสุด)</div>
       <div id="historyList" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- ประวัติจะถูกนำมาแสดงตรงนี้ผ่าน Javascript -->
-      </div>
+        </div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('historySec')">← กลับเมนูหลัก</button>
     </div>
 
-    <!-- Check-in / Check-out -->
     <div id="checkinSec" class="section">
       <div class="section-title" style="margin-top:8px">ลงเวลาเข้า-ออก</div>
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none"
@@ -417,7 +414,6 @@
       <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('checkinSec')">← ย้อนกลับ</button>
     </div>
 
-    <!-- Spot Check -->
     <div id="spotSec" class="section">
       <div class="section-title" style="margin-top:8px">ส่งงานสุ่มตรวจ (Spot Check)</div>
       <input type="file" id="spotImgInput" accept="image/*" capture="environment" style="display:none"
@@ -432,14 +428,11 @@
       <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('spotSec')">← ย้อนกลับ</button>
     </div>
 
-    <!-- Leave -->
     <div id="leaveSec" class="section">
       <div class="section-title" style="margin-top:8px">แจ้งลางาน</div>
-      <!-- โชว์โอที -->
       <div class="note" id="otDisplay" style="color:var(--accent2); background: rgba(126,200,160,0.1); border-color: rgba(126,200,160,0.3);">กำลังโหลดข้อมูลโอที...</div>
       <div class="note">⚠️ การลางานในวันที่มีลูกค้าประเมิน จะต้องชดเชยเวลา 2 เท่า</div>
       
-      <!-- เพิ่มให้ใส่วันที่ -->
       <div class="field">
         <label>วันที่เริ่มลา</label>
         <input type="date" id="leaveDate">
@@ -462,7 +455,6 @@
       <button class="btn btn-ghost"   onclick="goBack('leaveSec')">← ย้อนกลับ</button>
     </div>
 
-    <!-- Report Issue -->
     <div id="reportSec" class="section">
       <div class="section-title" style="margin-top:8px">แจ้งปัญหาเวลา</div>
       <div class="field">
@@ -558,7 +550,7 @@
 
       // ตรวจสอบรูปภาพ ห้ามใช้รูปที่เก่ากว่า 2 นาที
       if (diffMinutes > 2) {
-        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพผ่านกล้องเดี๋ยวนี้ ❌", "error");
+        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพผ่านกล้องเท่านั้น ❌", "error");
         e.target.value = ""; 
         return;
       }
@@ -671,7 +663,8 @@
       });
     }
 
-    // ===== ฟังก์ชันดึงประวัติ (History) =====
+    // ===== GAS URL — เปลี่ยนเป็น URL /exec ของคุณ =====
+    var GAS_URL = "https://script.google.com/macros/s/AKfycbyvCHuvU8NyuuawFdzjnlgGT8wjKvtBx4n7vejx4Bu-bDYoeWziy-83cNutF1mNBllB/exec";
 
     // ===== Core sender =====
     function sendPayload(payload) {
