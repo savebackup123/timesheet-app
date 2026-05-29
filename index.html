@@ -663,6 +663,32 @@
       });
     }
 
+    // ===== ฟังก์ชันใหม่: ดึงข้อมูลโอทีก่อนเปิดหน้าแจ้งลา =====
+    function openLeaveSection() {
+      showLoading("กำลังโหลดสิทธิคงเหลือ...");
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_leave_info' })
+      })
+      .then(r => r.json())
+      .then(res => {
+        hideLoading();
+        if(res.success) {
+          document.getElementById('otDisplay').innerHTML = `⏱️ ชั่วโมงโอทีสะสมของคุณ: <b>${res.otHours} ชั่วโมง</b>`;
+          showSection('leaveSec');
+        } else {
+          showToast("ไม่สามารถดึงข้อมูลโอทีได้", "error");
+          showSection('leaveSec'); 
+        }
+      })
+      .catch(err => {
+        hideLoading();
+        showToast("เกิดข้อผิดพลาด", "error");
+        showSection('leaveSec');
+      });
+    }
+
     // ===== GAS URL — เปลี่ยนเป็น URL /exec ของคุณ =====
     var GAS_URL = "https://script.google.com/macros/s/AKfycbyvCHuvU8NyuuawFdzjnlgGT8wjKvtBx4n7vejx4Bu-bDYoeWziy-83cNutF1mNBllB/exec";
 
@@ -698,7 +724,6 @@
       fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        // เพิ่ม displayName ส่งไปด้วยเพื่อความชัวร์ในการเช็คสิทธิ์
         body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_history' })
       })
       .then(function(r) { return r.json(); })
