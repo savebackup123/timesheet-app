@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- เพิ่ม EXIF.js สำหรับตรวจสอบเวลาถ่ายภาพที่แท้จริง -->
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
   <style>
     :root {
       --bg:        #0d0f14;
@@ -298,7 +300,7 @@
     .toast.success { border-color: var(--accent2); color: var(--accent2); }
     .toast.error   { border-color: var(--danger);  color: var(--danger); }
 
-    /* ===== เพิ่ม CSS สำหรับหน้าประวัติ (History) ===== */
+    /* ===== CSS สำหรับหน้าประวัติและการ์ด ===== */
     .history-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -316,6 +318,20 @@
     .history-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
     .history-status.ok { background: rgba(126,200,160,0.15); color: var(--accent2); }
     .history-status.fail { background: rgba(224,92,92,0.15); color: var(--danger); }
+    
+    .summary-box {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .summary-item { text-align: center; flex: 1; }
+    .summary-item:not(:last-child) { border-right: 1px solid var(--border); }
+    .summary-val { font-size: 18px; font-weight: 700; color: var(--text); }
+    .summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -357,7 +373,7 @@
           <div class="menu-icon orange">📝</div>
           <div class="menu-info">
             <div class="menu-label">แจ้งลางาน</div>
-            <div class="menu-desc">ลาป่วย / ลากิจ / ลาพักร้อน</div>
+            <div class="menu-desc">เช็คสิทธิ / ส่งใบลา</div>
           </div>
           <div class="menu-arrow">›</div>
         </div>
@@ -390,13 +406,14 @@
       </div>
     </div>
 
+    <!-- หน้าประวัติเวลา -->
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา (15 รายการล่าสุด)</div>
-      <div id="historyList" style="display:flex; flex-direction:column; gap:10px;">
-        </div>
+      <div id="historyList" style="display:flex; flex-direction:column; gap:10px;"></div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('historySec')">← กลับเมนูหลัก</button>
     </div>
 
+    <!-- หน้าเข้าออกงาน -->
     <div id="checkinSec" class="section">
       <div class="section-title" style="margin-top:8px">ลงเวลาเข้า-ออก</div>
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none"
@@ -414,6 +431,7 @@
       <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('checkinSec')">← ย้อนกลับ</button>
     </div>
 
+    <!-- หน้าสุ่มตรวจ -->
     <div id="spotSec" class="section">
       <div class="section-title" style="margin-top:8px">ส่งงานสุ่มตรวจ (Spot Check)</div>
       <input type="file" id="spotImgInput" accept="image/*" capture="environment" style="display:none"
@@ -428,9 +446,34 @@
       <button class="btn btn-ghost" style="margin-top:10px" onclick="goBack('spotSec')">← ย้อนกลับ</button>
     </div>
 
+    <!-- หน้าลางาน (ปรับปรุงใหม่ให้มีประวัติ) -->
     <div id="leaveSec" class="section">
-      <div class="section-title" style="margin-top:8px">แจ้งลางาน</div>
-      <div class="note" id="otDisplay" style="color:var(--accent2); background: rgba(126,200,160,0.1); border-color: rgba(126,200,160,0.3);">กำลังโหลดข้อมูลโอที...</div>
+      <div class="section-title" style="margin-top:8px">ข้อมูลสิทธิและการลา</div>
+      
+      <!-- โชว์สรุปยอด -->
+      <div class="summary-box">
+        <div class="summary-item">
+          <div class="summary-val" id="otVal">-</div>
+          <div class="summary-label">โอทีคงเหลือ</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-val" id="leaveApprovedVal" style="color:var(--accent2);">-</div>
+          <div class="summary-label">อนุมัติแล้ว (วัน)</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-val" id="leavePendingVal" style="color:var(--warn);">-</div>
+          <div class="summary-label">รอตรวจสอบ</div>
+        </div>
+      </div>
+
+      <!-- โชว์ประวัติการลา -->
+      <div id="leaveHistoryList" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+        <!-- Javascript จะวาดการ์ดตรงนี้ -->
+      </div>
+
+      <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+
+      <div class="section-title">ฟอร์มส่งใบลา</div>
       <div class="note">⚠️ การลางานในวันที่มีลูกค้า จะต้องชดเชยเวลา 2 เท่า</div>
       
       <div class="field">
@@ -455,6 +498,7 @@
       <button class="btn btn-ghost"   onclick="goBack('leaveSec')">← ย้อนกลับ</button>
     </div>
 
+    <!-- หน้าแจ้งปัญหา -->
     <div id="reportSec" class="section">
       <div class="section-title" style="margin-top:8px">แจ้งปัญหาเวลา</div>
       <div class="field">
@@ -508,7 +552,6 @@
       }
     }
 
-    // ===== Section nav =====
     function showSection(id) {
       document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -534,27 +577,63 @@
         resetUpload('issueUpload', 'issuePreview');
       }
       if (fromSection === 'historySec') {
-        document.getElementById('historyList').innerHTML = ""; // ล้างข้อมูลประวัติเมื่อกดกลับ
+        document.getElementById('historyList').innerHTML = ""; 
+      }
+      if (fromSection === 'leaveSec') {
+        document.getElementById('leaveDate').value = ""; 
+        document.getElementById('leaveEndDate').value = "";
+        document.getElementById('leaveHistoryList').innerHTML = ""; 
       }
       showSection('mainMenu');
     }
 
-    // ===== Image handling =====
+    // ===== Image handling (EXIF Check) =====
     function handleImage(e, previewId, uploadId) {
       const file = e.target.files[0];
       if (!file) return;
 
-      const currentTime = new Date().getTime();
-      const fileTime = file.lastModified; 
-      const diffMinutes = Math.abs(currentTime - fileTime) / (1000 * 60);
-
-      // ตรวจสอบรูปภาพ ห้ามใช้รูปที่เก่ากว่า 2 นาที
-      if (diffMinutes > 2) {
-        showToast("ไม่อนุญาตให้ใช้รูปเก่า กรุณาถ่ายภาพผ่านกล้องเท่านั้น ❌", "error");
-        e.target.value = ""; 
-        return;
+      if (previewId === 'issuePreview') {
+         processImageToCanvas(file, previewId, uploadId);
+         return;
       }
 
+      showLoading("กำลังตรวจสอบเวลาภาพถ่าย...");
+
+      EXIF.getData(file, function() {
+        let dateStr = EXIF.getTag(this, "DateTimeOriginal");
+        let isValid = false;
+
+        if (dateStr) {
+          let parts = dateStr.split(' ');
+          let dateParts = parts[0].split(':');
+          let timeParts = parts[1].split(':');
+          let takenDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], timeParts[2]);
+
+          let currentTime = new Date();
+          let diffMinutes = Math.abs(currentTime - takenDate) / (1000 * 60);
+
+          if (diffMinutes <= 3) {
+            isValid = true;
+          } else {
+            hideLoading();
+            showToast("รูปภาพเก่าเกินไป (" + Math.floor(diffMinutes) + " นาทีที่แล้ว) กรุณาถ่ายใหม่ ❌", "error");
+            e.target.value = ""; 
+            return;
+          }
+        } else {
+          hideLoading();
+          showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ หรือรูปที่ผ่านการแต่ง/ครอป ❌", "error");
+          e.target.value = ""; 
+          return;
+        }
+
+        if (isValid) {
+          processImageToCanvas(file, previewId, uploadId);
+        }
+      });
+    }
+
+    function processImageToCanvas(file, previewId, uploadId) {
       const reader = new FileReader();
       reader.onload = function(ev) {
         const img = new Image();
@@ -588,6 +667,8 @@
             return function() { document.getElementById(inp).click(); };
           })(inputId);
           document.getElementById(previewId).src = b64;
+          
+          hideLoading(); 
         };
         img.src = ev.target.result;
       };
@@ -643,12 +724,11 @@
 
     function submitLeave() {
       var lDate = document.getElementById('leaveDate').value;
-      var lEndDate = document.getElementById('leaveEndDate').value; // รับค่าวันสิ้นสุด
+      var lEndDate = document.getElementById('leaveEndDate').value; 
 
       if (!lDate) { showToast("กรุณาระบุวันที่เริ่มลา", "error"); return; }
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
 
-      // เช็คว่าวันสิ้นสุด ต้องไม่น้อยกว่าวันเริ่ม
       if (new Date(lEndDate) < new Date(lDate)) {
         showToast("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มลา", "error"); return; 
       }
@@ -663,9 +743,9 @@
       });
     }
 
-    // ===== ฟังก์ชันใหม่: ดึงข้อมูลโอทีก่อนเปิดหน้าแจ้งลา =====
+    // ===== ฟังก์ชัน: ดึงข้อมูลการลาและโอที =====
     function openLeaveSection() {
-      showLoading("กำลังโหลดสิทธิคงเหลือ...");
+      showLoading("กำลังโหลดข้อมูลสิทธิและการลา...");
       fetch(GAS_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -675,16 +755,42 @@
       .then(res => {
         hideLoading();
         if(res.success) {
-          document.getElementById('otDisplay').innerHTML = `⏱️ ชั่วโมงโอทีสะสมของคุณ: <b>${res.otHours} ชั่วโมง</b>`;
+          // โชว์ตัวเลขสรุป
+          document.getElementById('otVal').textContent = res.otHours;
+          document.getElementById('leaveApprovedVal').textContent = res.totalApprovedDays;
+          document.getElementById('leavePendingVal').textContent = res.pendingDays;
+
+          // วาดการ์ดประวัติการลา
+          let listHtml = '';
+          if (res.leaveHistory && res.leaveHistory.length > 0) {
+             res.leaveHistory.forEach(item => {
+                let sColor = item.status === 'อนุมัติ' ? 'var(--accent2)' : (item.status === 'รอตรวจสอบ' ? 'var(--warn)' : 'var(--danger)');
+                listHtml += `
+                  <div class="history-card" style="padding: 12px 14px;">
+                    <div class="history-left">
+                      <div class="history-action">${item.type} <span style="font-size:12px; color:var(--text-muted); font-weight:normal;">(${item.days} วัน)</span></div>
+                      <div class="history-date">${item.start} - ${item.end}</div>
+                    </div>
+                    <div class="history-right">
+                      <div class="history-status" style="color:${sColor}; border:1px solid ${sColor}; background:transparent;">${item.status}</div>
+                    </div>
+                  </div>
+                `;
+             });
+          } else {
+             listHtml = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">ยังไม่มีประวัติการลางาน</div>';
+          }
+          document.getElementById('leaveHistoryList').innerHTML = listHtml;
+
           showSection('leaveSec');
         } else {
-          showToast("ไม่สามารถดึงข้อมูลโอทีได้", "error");
+          showToast("ไม่สามารถดึงข้อมูลได้", "error");
           showSection('leaveSec'); 
         }
       })
       .catch(err => {
         hideLoading();
-        showToast("เกิดข้อผิดพลาด", "error");
+        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล", "error");
         showSection('leaveSec');
       });
     }
@@ -692,7 +798,6 @@
     // ===== GAS URL — เปลี่ยนเป็น URL /exec ของคุณ =====
     var GAS_URL = "https://script.google.com/macros/s/AKfycbyvCHuvU8NyuuawFdzjnlgGT8wjKvtBx4n7vejx4Bu-bDYoeWziy-83cNutF1mNBllB/exec";
 
-    // ===== Core sender =====
     function sendPayload(payload) {
       if (submitting) return;
       submitting = true;
@@ -718,7 +823,6 @@
       });
     }
 
-    // ===== เพิ่มฟังก์ชันดึงประวัติ (History) =====
     function fetchHistory() {
       showLoading("กำลังโหลดประวัติ...");
       fetch(GAS_URL, {
@@ -744,7 +848,7 @@
 
     function renderHistory(data) {
       var container = document.getElementById('historyList');
-      container.innerHTML = ""; // ล้างของเก่า
+      container.innerHTML = ""; 
       
       if (!data || data.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">ยังไม่มีประวัติการลงเวลา</div>';
@@ -752,7 +856,6 @@
       }
 
       data.forEach(function(item) {
-        // กำหนดสีและไอคอนตามการกระทำ
         var actionColor = item.action === 'เข้างาน' ? 'var(--accent2)' : 'var(--danger)';
         var statusClass = item.status === 'สำเร็จ' ? 'ok' : 'fail';
         
@@ -772,7 +875,6 @@
       });
     }
 
-    // ===== UI helpers =====
     function setStatus(type, text) {
       document.getElementById('statusDot').className  = 'status-dot' + (type !== 'ok' ? ' ' + type : '');
       document.getElementById('statusText').textContent = text;
@@ -793,7 +895,6 @@
       el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
     }
 
-    // ===== Start =====
     window.onload = init;
   </script>
 </body>
