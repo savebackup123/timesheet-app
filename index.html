@@ -309,7 +309,7 @@
     }
     .summary-item { text-align: center; flex: 1; }
     .summary-item:not(:last-child) { border-right: 1px solid var(--border); }
-    .summary-val { font-size: 18px; font-weight: 700; color: var(--text); }
+    .summary-val { font-size: 16px; font-weight: 700; color: var(--text); }
     .summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
   </style>
 </head>
@@ -426,24 +426,32 @@
     <!-- หน้าลางาน -->
     <div id="leaveSec" class="section">
       <div class="section-title" style="margin-top:8px">ข้อมูลสิทธิและการลา</div>
+      <!-- [อัปเดต] กล่องสรุปสถานะเพิ่ม วันหยุดนักขัตฤกษ์ เข้าไป -->
       <div class="summary-box">
         <div class="summary-item">
           <div class="summary-val" id="otVal">-</div>
           <div class="summary-label">โอทีคงเหลือ</div>
         </div>
         <div class="summary-item">
+          <div class="summary-val" id="holidayVal" style="color:var(--accent);">-</div>
+          <div class="summary-label">วันหยุด (วัน)</div>
+        </div>
+        <div class="summary-item">
           <div class="summary-val" id="leaveApprovedVal" style="color:var(--accent2);">-</div>
-          <div class="summary-label">อนุมัติแล้ว (วัน)</div>
+          <div class="summary-label">อนุมัติแล้ว</div>
         </div>
         <div class="summary-item">
           <div class="summary-val" id="leavePendingVal" style="color:var(--warn);">-</div>
-          <div class="summary-label">รอตรวจสอบ</div>
+          <div class="summary-label">รอตรวจ</div>
         </div>
       </div>
       <div id="leaveHistoryList" style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;"></div>
+      
       <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+      
       <div class="section-title">ฟอร์มส่งใบลา</div>
       <div class="note">⚠️ การลางานในวันที่มีลูกค้า จะต้องชดเชยเวลา 2 เท่า</div>
+      
       <div class="field">
         <label>วันที่เริ่มลา</label>
         <input type="date" id="leaveDate">
@@ -460,6 +468,15 @@
           <option value="ลาพักร้อน">🌴 ลาพักร้อน</option>
         </select>
       </div>
+      <!-- [อัปเดต] เพิ่มตัวเลือกการหักชดเชย -->
+      <div class="field">
+        <label>รูปแบบชดเชยเวลา (กรณีมีลูกค้า)</label>
+        <select id="deductType">
+          <option value="ot">⏱️ หักจากชั่วโมงโอที (วันละ 8 ชม.)</option>
+          <option value="holiday">🗓️ หักจากวันหยุดนักขัตฤกษ์ (วันละ 1 วัน)</option>
+        </select>
+      </div>
+
       <button class="btn btn-warning" onclick="submitLeave()">ส่งคำขอลา 📝</button>
       <button class="btn btn-ghost"   onclick="goBack('leaveSec')">← ย้อนกลับ</button>
     </div>
@@ -479,7 +496,6 @@
         <div class="upload-sub">ไม่บังคับ — แตะเพื่อเลือกภาพ</div>
       </div>
       <img id="issuePreview" src="" style="display:none">
-      <!-- FIX #4: เพิ่ม submitIssue() ที่หายไปในเวอร์ชันเดิม -->
       <button class="btn btn-danger" onclick="submitIssue()">ส่งคำร้อง ⚠️</button>
       <button class="btn btn-ghost"  onclick="goBack('reportSec')">← ย้อนกลับ</button>
     </div>
@@ -553,26 +569,23 @@
       if (fromSection === 'leaveSec') {
         document.getElementById('leaveDate').value    = "";
         document.getElementById('leaveEndDate').value = "";
+        document.getElementById('deductType').value   = "ot";
         document.getElementById('leaveHistoryList').innerHTML = "";
-        // FIX #9: reset summary values ด้วย ไม่ใช่แค่ history
-        document.getElementById('otVal').textContent          = "-";
+        
+        document.getElementById('otVal').textContent            = "-";
+        document.getElementById('holidayVal').textContent       = "-";
         document.getElementById('leaveApprovedVal').textContent = "-";
         document.getElementById('leavePendingVal').textContent  = "-";
       }
       showSection('mainMenu');
     }
 
-    // ===== Image handling =====
-    // FIX #1: EXIF check ยังคงอยู่ฝั่ง client (เป็น UX guard)
-    //         แต่ server-side (GAS) จะทำการ validate ซ้ำอีกครั้ง
-    //         เพิ่ม: ส่ง photoTimestamp ไปพร้อม payload ให้ GAS ตรวจสอบด้วย
     var lastPhotoTimestamp = { checkin: null, spot: null };
 
     function handleImage(e, previewId, uploadId) {
       var file = e.target.files[0];
       if (!file) return;
 
-      // รูปหลักฐาน (issue) ไม่บังคับตรวจ EXIF
       if (previewId === 'issuePreview') {
         processImageToCanvas(file, previewId, uploadId, null);
         return;
@@ -584,7 +597,6 @@
         var dateStr = EXIF.getTag(this, "DateTimeOriginal");
 
         if (!dateStr) {
-          // FIX #1: ถ้าไม่มี EXIF ปฏิเสธทันที — ไม่อนุญาต screenshot หรือรูปที่ถูก strip
           hideLoading();
           showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ หรือรูปที่ผ่านการแต่ง/ครอป ❌", "error");
           e.target.value = "";
@@ -608,7 +620,6 @@
           return;
         }
 
-        // FIX #1: เก็บ timestamp จาก EXIF เพื่อส่งไป verify ที่ server ด้วย
         var photoTs = takenDate.toISOString();
         if (previewId === 'checkinPreview') lastPhotoTimestamp.checkin = photoTs;
         if (previewId === 'spotPreview')    lastPhotoTimestamp.spot    = photoTs;
@@ -678,7 +689,6 @@
       document.getElementById(previewId).src = "";
     }
 
-    // ===== Submit handlers =====
     function submitData(type) {
       if (!loc)              { showToast("ไม่พบ GPS — กรุณาเปิดตำแหน่งที่ตั้ง", "error"); return; }
       if (!imageB64.checkin) { showToast("กรุณาถ่ายภาพก่อนบันทึก", "error"); return; }
@@ -688,7 +698,6 @@
         lat:              loc.lat,
         lng:              loc.lng,
         imageB64:         imageB64.checkin,
-        // FIX #1: ส่ง photoTimestamp ไปให้ GAS ตรวจสอบซ้ำฝั่ง server
         photoTimestamp:   lastPhotoTimestamp.checkin,
         type:             type
       });
@@ -703,13 +712,11 @@
         lat:              loc.lat,
         lng:              loc.lng,
         imageB64:         imageB64.spot,
-        // FIX #1: ส่ง photoTimestamp ไปให้ GAS ตรวจสอบซ้ำฝั่ง server
         photoTimestamp:   lastPhotoTimestamp.spot,
         type:             'spot_check'
       });
     }
 
-    // FIX #4: เพิ่ม submitIssue() ที่หายไปในเวอร์ชันเดิมทั้งหมด
     function submitIssue() {
       var issueText = document.getElementById('issueText').value.trim();
       if (!issueText) {
@@ -728,6 +735,8 @@
     function submitLeave() {
       var lDate    = document.getElementById('leaveDate').value;
       var lEndDate = document.getElementById('leaveEndDate').value;
+      // ดึงค่าว่าพนักงานเลือกหักจากโอที หรือ วันหยุด
+      var deductType = document.getElementById('deductType').value; 
 
       if (!lDate)    { showToast("กรุณาระบุวันที่เริ่มลา", "error"); return; }
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
@@ -741,11 +750,11 @@
         type:         'leave',
         leaveDate:    lDate,
         leaveEndDate: lEndDate,
-        leaveType:    document.getElementById('leaveType').value
+        leaveType:    document.getElementById('leaveType').value,
+        deductType:   deductType  // แนบตัวเลือกไปให้ระบบหลังบ้านด้วย
       });
     }
 
-    // ===== โหลดข้อมูลการลาและโอที =====
     function openLeaveSection() {
       showLoading("กำลังโหลดข้อมูลสิทธิและการลา...");
       fetch(GAS_URL, {
@@ -757,7 +766,9 @@
       .then(function(res) {
         hideLoading();
         if (res.success) {
-          document.getElementById('otVal').textContent           = res.otHours;
+          // อัปเดตข้อมูลยอดต่างๆ ขึ้นหน้าจอ
+          document.getElementById('otVal').textContent            = res.otHours;
+          document.getElementById('holidayVal').textContent       = res.holidayBalance !== undefined ? res.holidayBalance : "-";
           document.getElementById('leaveApprovedVal').textContent = res.totalApprovedDays;
           document.getElementById('leavePendingVal').textContent  = res.pendingDays;
 
