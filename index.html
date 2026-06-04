@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf</title>
+  <title>ระบบจัดการเวลาทำงาน</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -590,8 +590,11 @@
         var dateStr = EXIF.getTag(this, "DateTimeOriginal");
         var takenDate;
 
+        // เช็คว่าผู้ใช้ใช้ iPhone/iPad หรือไม่
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
         if (dateStr) {
-          // กรณีมีข้อมูล EXIF ครบถ้วน
+          // กรณีมีข้อมูล EXIF ครบถ้วน (ถ่ายจากกล้องจริงๆ)
           var parts     = dateStr.split(' ');
           var dateParts = parts[0].split(':');
           var timeParts = parts[1].split(':');
@@ -600,15 +603,23 @@
             parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])
           );
         } else {
-          // แผนสำรอง: กรณี iPhone หรือเครื่องที่ลบ EXIF ทิ้งเพื่อ Privacy
-          // ให้ใช้วันที่และเวลาของไฟล์ (lastModified) แทน
-          takenDate = new Date(file.lastModified);
+          // กรณีไม่มี EXIF (อาจจะเป็นรูปแคปหน้าจอ, รูปเซฟมา, หรือถูก iPhone ลบทิ้ง)
+          if (isIOS) {
+            // อนุโลมให้ iPhone: ใช้เวลาอัปเดตไฟล์ล่าสุดแทน
+            takenDate = new Date(file.lastModified);
+          } else {
+            // กฎเหล็ก Android: ถ้าไม่มี EXIF แปลว่าไปเลือกรูปแกลลอรี่มาแน่นอน บล็อกทันที!
+            hideLoading();
+            showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ กรุณาถ่ายจากกล้องสดเท่านั้น ❌", "error");
+            e.target.value = "";
+            return;
+          }
         }
 
         var currentTime  = new Date();
         var diffMinutes  = Math.abs(currentTime - takenDate) / (1000 * 60);
 
-        // ให้เวลายืดหยุ่นเป็น 5 นาที เผื่อเครื่องประมวลผลช้า หรือเดินหาสัญญาณเน็ต
+        // ให้เวลายืดหยุ่นเป็น 5 นาที เผื่อเครื่องประมวลผลช้า
         if (diffMinutes > 5) {
           hideLoading();
           showToast("รูปภาพเก่าเกินไป (" + Math.floor(diffMinutes) + " นาทีที่แล้ว) กรุณาถ่ายใหม่ ❌", "error");
