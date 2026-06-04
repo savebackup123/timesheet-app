@@ -739,30 +739,41 @@
       var todayStr = todayRaw.getFullYear() + '-' + pad(todayRaw.getMonth()+1) + '-' + pad(todayRaw.getDate());
 
       data.forEach(function(day) {
-        var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
-        var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
-        var html = '<div class="schedule-day-card">';
-        html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
-        if (day.rooms.length === 0) {
-            html += '<div class="empty-day-msg">ไม่มีลูกค้า (วิลล่าว่าง)</div>';
-        } else {
-            html += '<div class="schedule-room-list">';
-            day.rooms.forEach(function(r) {
-                var sClass = "status-" + r.status;
-                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ/สวน" : "ห้องจะเช็คเอาท์";
-                html += '<div class="schedule-room-item ' + sClass + '">';
-                html += '<div class="room-badge">' + r.room + '</div>';
-                html += '<div class="room-details">';
-                html += '<span class="status-text">' + sText + '</span>';
-                if (r.detail && r.detail !== "-") { html += '<span class="room-name-text">' + r.detail + '</span>'; }
-                html += '</div></div>';
-            });
-            html += '</div>';
-        }
-        html += '</div>';
-        container.innerHTML += html;
-      });
-    }
+      var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
+      var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
+      
+      // --- 💡 ส่วนที่เพิ่มเข้ามาใหม่: หาชื่อวันภาษาไทย ---
+      var daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+      var parts = day.rawDate.split('-'); // แยก yyyy-mm-dd
+      var d = new Date(parts[0], parts[1] - 1, parts[2]); // สร้างเป็นวันที่
+      var dayName = "วัน" + daysTH[d.getDay()]; // จะได้ผลลัพธ์ เช่น "วันจันทร์"
+      // ------------------------------------------
+
+      var html = '<div class="schedule-day-card">';
+      
+      // --- 💡 แก้ไขบรรทัดนี้: เปลี่ยนอีโมจิเป็น 🗓️ และใส่ชื่อวันเข้าไป ---
+      html += '<div class="schedule-day-header' + isTodayClass + '">🗓️ ' + dayName + ' ที่ ' + day.dateStr + todayBadge + '</div>';
+      // ------------------------------------------
+      
+      if (day.rooms.length === 0) {
+          html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
+      } else {
+          html += '<div class="schedule-room-list">';
+          day.rooms.forEach(function(r) {
+              var sClass = "status-" + r.status;
+              var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
+              html += '<div class="schedule-room-item ' + sClass + '">';
+              html += '<div class="room-badge">' + r.room + '</div>';
+              html += '<div class="room-details">';
+              html += '<span class="status-text">' + sText + '</span>';
+              if (r.detail && r.detail !== "-") { html += '<span class="room-name-text">' + r.detail + '</span>'; }
+              html += '</div></div>';
+          });
+          html += '</div>';
+      }
+      html += '</div>';
+      container.innerHTML += html;
+    });
 
     var lastPhotoTimestamp = { checkin: null, spot: null };
     function handleImage(e, previewId, uploadId) {
