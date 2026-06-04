@@ -17,7 +17,7 @@
       --border:    #2a3040;
       --accent:    #4f9eff;
       --accent2:   #7ec8a0;
-      --accent3:   #a855f7; /* สีใหม่สำหรับปุ่มตารางเข้าพัก (ม่วง) */
+      --accent3:   #a855f7; 
       --warn:      #f5a623;
       --danger:    #e05c5c;
       --text:      #e8edf5;
@@ -151,7 +151,7 @@
     .menu-card.green:hover  { border-color: var(--accent2); }
     .menu-card.orange:hover { border-color: var(--warn); }
     .menu-card.red:hover    { border-color: var(--danger); }
-    .menu-card.purple:hover { border-color: var(--accent3); } /* Hover สีม่วง */
+    .menu-card.purple:hover { border-color: var(--accent3); } 
 
     .menu-icon {
       width: 48px; height: 48px;
@@ -164,7 +164,7 @@
     .menu-icon.blue   { background: rgba(79,158,255,0.12); }
     .menu-icon.orange { background: rgba(245,166,35,0.12); }
     .menu-icon.red    { background: rgba(224,92,92,0.12); }
-    .menu-icon.purple { background: rgba(168,85,247,0.12); } /* พื้นหลังสีม่วง */
+    .menu-icon.purple { background: rgba(168,85,247,0.12); } 
 
     .menu-info { flex: 1; }
     .menu-label { font-size: 15px; font-weight: 600; }
@@ -305,11 +305,17 @@
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast.success { border-color: var(--accent2); color: var(--accent2); }
     .toast.error   { border-color: var(--danger);  color: var(--danger); }
+    
     .history-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 14px 16px;
+      display: flex;
+      flex-direction: column; /* เปลี่ยนเป็น column เพื่อให้มีพื้นที่ใส่ detail */
+      gap: 10px;
+    }
+    .history-card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -322,6 +328,15 @@
     .history-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
     .history-status.ok { background: rgba(126,200,160,0.15); color: var(--accent2); }
     .history-status.fail { background: rgba(224,92,92,0.15); color: var(--danger); }
+    .history-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface2);
+      padding: 8px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+
     .summary-box {
       background: var(--surface2);
       border-radius: 10px;
@@ -336,79 +351,53 @@
     .summary-val { font-size: 16px; font-weight: 700; color: var(--text); }
     .summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    /* --- สไตล์สำหรับตารางเข้าพักแบบ Card (ล่วงหน้า 14 วัน) --- */
     .schedule-day-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 12px;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 12px; overflow: hidden;
     }
     .schedule-day-header {
-      background: var(--surface2);
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 14px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      background: var(--surface2); padding: 12px 16px; font-weight: 600;
+      font-size: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
     }
     .schedule-day-header.is-today {
-      background: rgba(168, 85, 247, 0.15); /* เน้นสีม่วงสำหรับวันนี้ */
-      color: var(--accent3);
+      background: rgba(168, 85, 247, 0.15); color: var(--accent3);
       border-bottom-color: rgba(168, 85, 247, 0.3);
     }
-    .schedule-room-list {
-      padding: 8px 16px;
-    }
+    .schedule-room-list { padding: 8px 16px; }
     .schedule-room-item {
-      display: flex;
-      align-items: flex-start;
-      padding: 10px 0;
-      border-bottom: 1px dashed var(--border);
+      display: flex; align-items: flex-start; padding: 10px 0; border-bottom: 1px dashed var(--border);
     }
-    .schedule-room-item:last-child {
-      border-bottom: none;
-    }
+    .schedule-room-item:last-child { border-bottom: none; }
     .room-badge {
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 600;
-      background: rgba(255,255,255,0.05);
-      padding: 4px 8px;
-      border-radius: 6px;
-      margin-right: 12px;
-      min-width: 45px;
-      text-align: center;
+      font-family: var(--mono); font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05);
+      padding: 4px 8px; border-radius: 6px; margin-right: 12px; min-width: 45px; text-align: center;
     }
-    .room-details {
-      flex: 1;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .room-name-text {
-      color: var(--text-muted);
-      font-size: 11px;
-      display: block;
-      margin-top: 2px;
-    }
-    /* สีสถานะ */
+    .room-details { flex: 1; font-size: 13px; line-height: 1.4; }
+    .room-name-text { color: var(--text-muted); font-size: 11px; display: block; margin-top: 2px; }
     .status-checkin  .room-badge { color: var(--accent2); background: rgba(126,200,160,0.1); border: 1px solid rgba(126,200,160,0.3); }
     .status-stay     .room-badge { color: #facc15; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3); }
     .status-checkout .room-badge { color: #f87171; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); }
-    
     .status-checkin  .status-text { color: var(--accent2); font-weight: 500; }
     .status-stay     .status-text { color: #facc15; font-weight: 500; }
     .status-checkout .status-text { color: #f87171; font-weight: 500; }
+    .empty-day-msg { font-size: 13px; color: var(--text-muted); padding: 12px 0; text-align: center; font-style: italic; }
 
-    .empty-day-msg {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding: 12px 0;
-      text-align: center;
-      font-style: italic;
+    /* --- Modal Style (หน้าต่างป๊อปอัปสรุป) --- */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      z-index: 2000; align-items: center; justify-content: center; padding: 20px;
     }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; width: 100%; max-width: 340px;
+    }
+    .modal-title { font-size: 16px; font-weight: 700; color: var(--accent); margin-bottom: 12px; }
+    .modal-text { 
+      font-size: 14px; line-height: 1.5; color: var(--text); 
+      white-space: pre-wrap; font-family: inherit; margin-bottom: 20px; 
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
   </style>
 </head>
 <body>
@@ -419,6 +408,15 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Modal ป๊อปอัปแสดงข้อความสรุป -->
+  <div class="modal-overlay" id="summaryModal">
+    <div class="modal-box">
+      <div class="modal-title">📌 สรุปรายการ</div>
+      <div class="modal-text" id="summaryModalText"></div>
+      <button class="btn btn-primary" onclick="closeSummaryModal()">ตกลง (ปิดหน้าต่าง)</button>
+    </div>
+  </div>
 
   <div class="header">
     <div class="header-icon">⏱</div>
@@ -452,7 +450,6 @@
           <div class="menu-arrow">›</div>
         </div>
         
-        <!-- --- ปุ่มตารางเข้าพักใหม่ --- -->
         <div class="menu-card purple" onclick="openScheduleSection()">
           <div class="menu-icon purple">📅</div>
           <div class="menu-info">
@@ -461,7 +458,6 @@
           </div>
           <div class="menu-arrow">›</div>
         </div>
-        <!-- ----------------------- -->
 
         <div class="menu-card orange" onclick="openLeaveSection()">
           <div class="menu-icon orange">📝</div>
@@ -498,22 +494,14 @@
       </div>
     </div>
 
-    <!-- --- Section ตารางเข้าพักใหม่ --- -->
     <div id="scheduleSec" class="section">
       <div class="section-title" style="margin-top:8px">ตารางห้องพักล่วงหน้า 14 วัน</div>
-      
       <div class="note" style="border-color: var(--accent3); background: rgba(168,85,247,0.08); color: var(--accent3);">
         💡 สัญลักษณ์สี: <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ(เหลือง)</span>, <span style="color:#f87171">เช็คเอาท์(แดง)</span>
       </div>
-
-      <div id="scheduleListContainer">
-        <!-- ข้อมูลตารางจะถูก Gen มาใส่ตรงนี้ -->
-      </div>
-      
+      <div id="scheduleListContainer"></div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('scheduleSec')">← กลับเมนูหลัก</button>
     </div>
-    <!-- ----------------------- -->
-
 
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา(60 รายการล่าสุด)</div>
@@ -523,14 +511,11 @@
 
     <div id="checkinSec" class="section">
       <div class="section-title" style="margin-top:8px">ลงเวลาเข้า-ออก</div>
-      
       <div class="note" style="margin-bottom: 12px; border-color: var(--accent); background: rgba(79,158,255,0.08); color: var(--accent);">
         ✨ <b>Front Office:</b> วันที่มีลูกค้า ตอนเข้างานให้ "ถ่ายเซลฟี่หน้าตัวเอง" เพื่อตรวจการแต่งกาย (ออกงานถ่ายสถานที่ปกติ)
       </div>
-
       <input type="file" id="cameraInput" accept="image/*" capture style="display:none"
              onchange="handleImage(event,'checkinPreview','checkinUpload')">
-      
       <div class="upload-area" id="checkinUpload" onclick="document.getElementById('cameraInput').click()">
         <div class="upload-icon">📷</div>
         <div class="upload-text">ถ่ายภาพสถานที่ / เซลฟี่ (Front)</div>
@@ -635,25 +620,22 @@
 
   <script>
     // ===== State =====
-    var profile    = { userId: "Umock1234", displayName: "Tester (Preview Mode)" }; // Mock for canvas
-    var loc        = { lat: 14.619000, lng: 101.630000 }; // Mock for canvas
+    var profile    = { userId: "Umock1234", displayName: "Tester (Preview Mode)" }; 
+    var loc        = { lat: 14.619000, lng: 101.630000 }; 
     var imageB64   = { checkin: "", spot: "", issue: "" };
     var submitting = false;
 
     // ===== GAS URL (เอาไว้ทดสอบ) =====
     var GAS_URL = "https://script.google.com/macros/s/AKfycbwyx7wTCYGi7g0Rc5uZhT0RJxbPKMZK8UtLjwYtGx8zJ70x14bSP_rt2efqxujSscZa/exec";
 
-    // ===== Init (ปรับแต่งเล็กน้อยสำหรับดู Preview ใน Canvas) =====
+    // ===== Init =====
     async function init() {
-      // สำหรับการรันบนเว็บจริง เปิด LIFF ตามปกติ
       if(typeof liff !== 'undefined' && liff.init) {
           try {
             await liff.init({ liffId: "2010215863-7qiQMJWd" });
             if (!liff.isLoggedIn()) { liff.login(); return; }
-
             profile = await liff.getProfile();
             document.getElementById('headerSub').textContent = profile.displayName;
-
             setStatus("loading", "กำลังรับตำแหน่ง GPS...");
             navigator.geolocation.getCurrentPosition(
               function(pos) {
@@ -672,13 +654,10 @@
             setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
           }
       } else {
-          // ถ้าเปิดใน Canvas ให้ใช้ Mock Data
           document.getElementById('headerSub').textContent = profile.displayName;
           setStatus("ok", "พร้อมใช้งาน · โหมดทดสอบ (Canvas)");
-          
-          // จำลองข้อมูลหน้าหลัก
           document.getElementById('bookingBar').style.display = 'flex';
-          document.getElementById('bookingText').innerHTML = "ใช้ห้อง: <span class='booking-highlight'>A3</span> | รอเช็คเอาท์: <span class='booking-highlight'>A4</span>";
+          document.getElementById('bookingText').innerHTML = "โหมดทดลอง — ระบบปกติ";
       }
     }
 
@@ -686,23 +665,13 @@
       var bar = document.getElementById('bookingBar');
       var txt = document.getElementById('bookingText');
       bar.style.display = 'flex'; 
-      
       fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ type: 'get_booking_status' })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
-        if (res.success) {
-          txt.innerHTML = res.message;
-        } else {
-          bar.style.display = 'none';
-        }
-      })
-      .catch(function() {
-        bar.style.display = 'none'; 
-      });
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) { txt.innerHTML = res.message; } 
+        else { bar.style.display = 'none'; }
+      }).catch(function() { bar.style.display = 'none'; });
     }
 
     function showSection(id) {
@@ -730,18 +699,13 @@
         resetUpload('issueUpload', 'issuePreview');
         document.getElementById('issueText').value = "";
       }
-      if (fromSection === 'historySec') {
-        document.getElementById('historyList').innerHTML = "";
-      }
-      if (fromSection === 'scheduleSec') {
-        document.getElementById('scheduleListContainer').innerHTML = "";
-      }
+      if (fromSection === 'historySec') { document.getElementById('historyList').innerHTML = ""; }
+      if (fromSection === 'scheduleSec') { document.getElementById('scheduleListContainer').innerHTML = ""; }
       if (fromSection === 'leaveSec') {
         document.getElementById('leaveDate').value    = "";
         document.getElementById('leaveEndDate').value = "";
         document.getElementById('deductType').value   = "ot";
         document.getElementById('leaveHistoryList').innerHTML = "";
-        
         document.getElementById('otVal').textContent            = "-";
         document.getElementById('holidayVal').textContent       = "-";
         document.getElementById('leaveApprovedVal').textContent = "-";
@@ -750,83 +714,46 @@
       showSection('mainMenu');
     }
 
-    // --- ฟังก์ชันดึงตาราง 14 วัน ---
     function openScheduleSection() {
       showLoading("กำลังโหลดตารางเข้าพัก...");
-      
-      // ดึงข้อมูลจาก GAS
       fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ type: 'get_booking_14days' })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
+      }).then(function(r) { return r.json(); }).then(function(res) {
         hideLoading();
-        if (res.success) {
-          renderScheduleList(res.data);
-          showSection('scheduleSec');
-        } else {
-          // ถ้าเปิดใน Canvas (ไม่มี GAS backend) ให้ใช้ Mock Data จำลอง
-          if(typeof liff === 'undefined' || !liff.init) {
-              renderMockSchedule();
-              showSection('scheduleSec');
-              return;
-          }
-          showToast(res.message || "ไม่สามารถดึงตารางได้", "error");
-        }
-      })
-      .catch(function(err) {
-        hideLoading();
-        // ถ้าเปิดใน Canvas ให้ใช้ Mock Data จำลอง
-        if(typeof liff === 'undefined' || !liff.init) {
-            renderMockSchedule();
-            showSection('scheduleSec');
-            return;
-        }
-        showToast("เกิดข้อผิดพลาดในการโหลดตาราง", "error");
-      });
+        if (res.success) { renderScheduleList(res.data); showSection('scheduleSec'); } 
+        else { showToast(res.message || "ไม่สามารถดึงตารางได้", "error"); }
+      }).catch(function(err) { hideLoading(); showToast("เกิดข้อผิดพลาดในการโหลดตาราง", "error"); });
     }
 
-    // ฟังก์ชันวาด UI ตาราง 14 วัน
     function renderScheduleList(data) {
       var container = document.getElementById('scheduleListContainer');
       container.innerHTML = "";
-      
       if (!data || data.length === 0) {
           container.innerHTML = '<div class="empty-day-msg">ไม่พบข้อมูลในตาราง</div>';
           return;
       }
-
-      var todayRaw = new Date();
-      todayRaw.setHours(0,0,0,0);
-      // เปลี่ยน timezone เป็น GMT+7 เพื่อเทียบ string ให้ชัวร์ (แบบง่าย)
+      var todayRaw = new Date(); todayRaw.setHours(0,0,0,0);
       var pad = function(n) { return n < 10 ? '0'+n : n; };
       var todayStr = todayRaw.getFullYear() + '-' + pad(todayRaw.getMonth()+1) + '-' + pad(todayRaw.getDate());
 
       data.forEach(function(day) {
-        // เช็คว่าใช่วันนี้ไหม (เอาไว้เปลี่ยนสี Header)
         var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
         var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
-
         var html = '<div class="schedule-day-card">';
         html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
-        
         if (day.rooms.length === 0) {
             html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
         } else {
             html += '<div class="schedule-room-list">';
             day.rooms.forEach(function(r) {
                 var sClass = "status-" + r.status;
-                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "รอเช็คเอาท์";
-                
+                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
                 html += '<div class="schedule-room-item ' + sClass + '">';
                 html += '<div class="room-badge">' + r.room + '</div>';
                 html += '<div class="room-details">';
                 html += '<span class="status-text">' + sText + '</span>';
-                if (r.detail && r.detail !== "-") {
-                    html += '<span class="room-name-text">' + r.detail + '</span>';
-                }
+                if (r.detail && r.detail !== "-") { html += '<span class="room-name-text">' + r.detail + '</span>'; }
                 html += '</div></div>';
             });
             html += '</div>';
@@ -835,77 +762,39 @@
         container.innerHTML += html;
       });
     }
-    
-    // ข้อมูลจำลองสำหรับทดสอบใน Canvas
-    function renderMockSchedule() {
-        var mockData = [
-            { dateStr: "04/06/2026", rawDate: "2026-06-04", rooms: [
-                { room: "A3", status: "stay", detail: "คุณฟ้า 6/6/69--6+หมา2" },
-                { room: "A4", status: "checkout", detail: "" }
-            ]},
-            { dateStr: "05/06/2026", rawDate: "2026-06-05", rooms: []},
-            { dateStr: "06/06/2026", rawDate: "2026-06-06", rooms: [
-                { room: "A1", status: "checkin", detail: "คุณเอก 6/6/69" },
-                { room: "A3", status: "checkout", detail: "คุณฟ้า 6/6/69--6+หมา2" }
-            ]}
-        ];
-        renderScheduleList(mockData);
-    }
-    // -----------------------------------
-
 
     var lastPhotoTimestamp = { checkin: null, spot: null };
-
     function handleImage(e, previewId, uploadId) {
       var file = e.target.files[0];
       if (!file) return;
-
-      if (previewId === 'issuePreview') {
-        processImageToCanvas(file, previewId, uploadId, null);
-        return;
-      }
+      if (previewId === 'issuePreview') { processImageToCanvas(file, previewId, uploadId, null); return; }
 
       showLoading("กำลังตรวจสอบเวลาภาพถ่าย...");
-
       EXIF.getData(file, function() {
         var dateStr = EXIF.getTag(this, "DateTimeOriginal");
         var takenDate;
-
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         if (dateStr) {
           var parts     = dateStr.split(' ');
           var dateParts = parts[0].split(':');
           var timeParts = parts[1].split(':');
-          takenDate = new Date(
-            parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]),
-            parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])
-          );
+          takenDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]),
+                               parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2]));
         } else {
-          if (isIOS) {
-            takenDate = new Date(file.lastModified);
-          } else {
-            hideLoading();
-            showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ กรุณาถ่ายจากกล้องสดเท่านั้น ❌", "error");
-            e.target.value = "";
-            return;
-          }
+          if (isIOS) { takenDate = new Date(file.lastModified); } 
+          else { hideLoading(); showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ ถ่ายสดเท่านั้น ❌", "error"); e.target.value = ""; return; }
         }
 
-        var currentTime  = new Date();
-        var diffMinutes  = Math.abs(currentTime - takenDate) / (1000 * 60);
-
+        var diffMinutes  = Math.abs(new Date() - takenDate) / (1000 * 60);
         if (diffMinutes > 5) {
-          hideLoading();
-          showToast("รูปภาพเก่าเกินไป (" + Math.floor(diffMinutes) + " นาทีที่แล้ว) กรุณาถ่ายใหม่ ❌", "error");
-          e.target.value = "";
-          return;
+          hideLoading(); showToast("รูปภาพเก่าเกินไป (" + Math.floor(diffMinutes) + " นาทีที่แล้ว) ถ่ายใหม่ ❌", "error");
+          e.target.value = ""; return;
         }
 
         var photoTs = takenDate.toISOString();
         if (previewId === 'checkinPreview') lastPhotoTimestamp.checkin = photoTs;
         if (previewId === 'spotPreview')    lastPhotoTimestamp.spot    = photoTs;
-
         processImageToCanvas(file, previewId, uploadId, photoTs);
       });
     }
@@ -934,15 +823,11 @@
             imageB64.issue = b64;
           }
 
-          var inputId = previewId === 'checkinPreview' ? 'cameraInput'
-                      : previewId === 'spotPreview'    ? 'spotImgInput'
-                      : 'issueImgInput';
+          var inputId = previewId === 'checkinPreview' ? 'cameraInput' : previewId === 'spotPreview' ? 'spotImgInput' : 'issueImgInput';
           var uploadEl = document.getElementById(uploadId);
           uploadEl.classList.add('has-image');
           uploadEl.innerHTML = '<img src="' + b64 + '"><span class="upload-change">📷 เปลี่ยนภาพ</span>';
-          uploadEl.onclick = (function(inp) {
-            return function() { document.getElementById(inp).click(); };
-          })(inputId);
+          uploadEl.onclick = (function(inp) { return function() { document.getElementById(inp).click(); }; })(inputId);
           document.getElementById(previewId).src = b64;
           hideLoading();
         };
@@ -956,18 +841,12 @@
       var isCheckin = uploadId === 'checkinUpload';
       var isSpot    = uploadId === 'spotUpload';
       var icon = (isCheckin || isSpot) ? '📷' : '🖼';
-      var text = isCheckin ? 'ถ่ายภาพสถานที่'
-               : isSpot    ? 'ถ่ายภาพจุดที่ได้รับมอบหมาย'
-               : 'แนบภาพหลักฐาน';
+      var text = isCheckin ? 'ถ่ายภาพสถานที่' : isSpot ? 'ถ่ายภาพจุดที่ได้รับมอบหมาย' : 'แนบภาพหลักฐาน';
       var sub  = (isCheckin || isSpot) ? 'แตะเพื่อเปิดกล้อง' : 'ไม่บังคับ — แตะเพื่อเลือกภาพ';
       var inp  = isCheckin ? 'cameraInput' : isSpot ? 'spotImgInput' : 'issueImgInput';
       el.classList.remove('has-image');
-      el.innerHTML = '<div class="upload-icon">' + icon + '</div>'
-                   + '<div class="upload-text">' + text + '</div>'
-                   + '<div class="upload-sub">'  + sub  + '</div>';
-      el.onclick = (function(i) {
-        return function() { document.getElementById(i).click(); };
-      })(inp);
+      el.innerHTML = '<div class="upload-icon">' + icon + '</div><div class="upload-text">' + text + '</div><div class="upload-sub">'  + sub  + '</div>';
+      el.onclick = (function(i) { return function() { document.getElementById(i).click(); }; })(inp);
       document.getElementById(previewId).src = "";
     }
 
@@ -1001,10 +880,7 @@
 
     function submitIssue() {
       var issueText = document.getElementById('issueText').value.trim();
-      if (!issueText) {
-        showToast("กรุณาระบุรายละเอียดปัญหา", "error");
-        return;
-      }
+      if (!issueText) { showToast("กรุณาระบุรายละเอียดปัญหา", "error"); return; }
       sendPayload({
         userId:      profile.userId,
         displayName: profile.displayName,
@@ -1018,13 +894,9 @@
       var lDate    = document.getElementById('leaveDate').value;
       var lEndDate = document.getElementById('leaveEndDate').value;
       var deductType = document.getElementById('deductType').value; 
-
       if (!lDate)    { showToast("กรุณาระบุวันที่เริ่มลา", "error"); return; }
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
-      if (new Date(lEndDate) < new Date(lDate)) {
-        showToast("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มลา", "error"); return;
-      }
-
+      if (new Date(lEndDate) < new Date(lDate)) { showToast("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มลา", "error"); return; }
       sendPayload({
         userId:       profile.userId,
         displayName:  profile.displayName,
@@ -1039,50 +911,26 @@
     function openLeaveSection() {
       showLoading("กำลังโหลดข้อมูลสิทธิและการลา...");
       fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_leave_info' })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
+      }).then(function(r) { return r.json(); }).then(function(res) {
         hideLoading();
         if (res.success) {
           document.getElementById('otVal').textContent            = res.otHours;
           document.getElementById('holidayVal').textContent       = res.holidayBalance !== undefined ? res.holidayBalance : "-";
           document.getElementById('leaveApprovedVal').textContent = res.totalApprovedDays;
           document.getElementById('leavePendingVal').textContent  = res.pendingDays;
-
           var listHtml = '';
           if (res.leaveHistory && res.leaveHistory.length > 0) {
             res.leaveHistory.forEach(function(item) {
-              var sColor = item.status === 'อนุมัติ' ? 'var(--accent2)'
-                         : item.status === 'รอตรวจสอบ' ? 'var(--warn)'
-                         : 'var(--danger)';
-              listHtml += '<div class="history-card" style="padding:12px 14px;">'
-                        + '<div class="history-left">'
-                        + '<div class="history-action">' + item.type + ' <span style="font-size:12px;color:var(--text-muted);font-weight:normal;">(' + item.days + ' วัน)</span></div>'
-                        + '<div class="history-date">' + item.start + ' - ' + item.end + '</div>'
-                        + '</div>'
-                        + '<div class="history-right">'
-                        + '<div class="history-status" style="color:' + sColor + ';border:1px solid ' + sColor + ';background:transparent;">' + item.status + '</div>'
-                        + '</div>'
-                        + '</div>';
+              var sColor = item.status === 'อนุมัติ' ? 'var(--accent2)' : item.status === 'รอตรวจสอบ' ? 'var(--warn)' : 'var(--danger)';
+              listHtml += '<div class="history-card" style="padding:12px 14px;"><div class="history-left"><div class="history-action">' + item.type + ' <span style="font-size:12px;color:var(--text-muted);font-weight:normal;">(' + item.days + ' วัน)</span></div><div class="history-date">' + item.start + ' - ' + item.end + '</div></div><div class="history-right"><div class="history-status" style="color:' + sColor + ';border:1px solid ' + sColor + ';background:transparent;">' + item.status + '</div></div></div>';
             });
-          } else {
-            listHtml = '<div style="font-size:12px;color:var(--text-muted);text-align:center;">ยังไม่มีประวัติการลางาน</div>';
-          }
+          } else { listHtml = '<div style="font-size:12px;color:var(--text-muted);text-align:center;">ยังไม่มีประวัติการลางาน</div>'; }
           document.getElementById('leaveHistoryList').innerHTML = listHtml;
           showSection('leaveSec');
-        } else {
-          showToast("ไม่สามารถดึงข้อมูลได้", "error");
-          showSection('leaveSec');
-        }
-      })
-      .catch(function() {
-        hideLoading();
-        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล", "error");
-        showSection('leaveSec');
-      });
+        } else { showToast("ไม่สามารถดึงข้อมูลได้", "error"); showSection('leaveSec'); }
+      }).catch(function() { hideLoading(); showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล", "error"); showSection('leaveSec'); });
     }
 
     function sendPayload(payload) {
@@ -1090,65 +938,62 @@
       submitting = true;
       showLoading("กำลังดำเนินการ...");
       fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
+      }).then(function(r) { return r.json(); }).then(function(res) {
         hideLoading();
         submitting = false;
         showToast(res.message, res.success ? "success" : "error");
-        if (res.success) {
-          setTimeout(function() { 
-              if(typeof liff !== 'undefined' && liff.closeWindow) liff.closeWindow(); 
-          }, 2200);
+        
+        // ถ้าระบบส่งกลับมาพร้อมข้อความสรุป ให้โชว์ Modal ค้างไว้ แทนการปิดแอปอัตโนมัติ
+        if (res.success && res.summaryAlert) {
+            document.getElementById('summaryModalText').textContent = res.summaryAlert;
+            document.getElementById('summaryModal').classList.add('active');
+        } else if (res.success) {
+            setTimeout(function() { if(typeof liff !== 'undefined' && liff.closeWindow) liff.closeWindow(); }, 2200);
         }
-      })
-      .catch(function() {
+      }).catch(function() {
         hideLoading();
         submitting = false;
         showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
       });
     }
 
+    // ฟังก์ชันปิด Modal (เมื่อพนักงานกดปุ่ม ตกลง)
+    function closeSummaryModal() {
+        document.getElementById('summaryModal').classList.remove('active');
+        if(typeof liff !== 'undefined' && liff.closeWindow) liff.closeWindow(); 
+    }
+
     function fetchHistory() {
       showLoading("กำลังโหลดประวัติ...");
       fetch(GAS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_history' })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(res) {
+      }).then(function(r) { return r.json(); }).then(function(res) {
         hideLoading();
-        if (res.success) {
-          renderHistory(res.history);
-          showSection('historySec');
-        } else {
-          showToast(res.message || "ไม่สามารถดึงข้อมูลได้", "error");
-        }
-      })
-      .catch(function() {
-        hideLoading();
-        showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
-      });
+        if (res.success) { renderHistory(res.history); showSection('historySec'); } 
+        else { showToast(res.message || "ไม่สามารถดึงข้อมูลได้", "error"); }
+      }).catch(function() { hideLoading(); showToast("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error"); });
     }
 
     function renderHistory(data) {
       var container = document.getElementById('historyList');
       container.innerHTML = "";
-
       if (!data || data.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">ยังไม่มีประวัติการลงเวลา</div>';
         return;
       }
-
       data.forEach(function(item) {
         var actionColor = item.action === 'เข้างาน' ? 'var(--accent2)' : 'var(--danger)';
         var statusClass = item.status === 'สำเร็จ' ? 'ok' : 'fail';
+        
+        // ถ้ามีรายละเอียดสรุป (Detail) ให้ดึงมาแสดงไว้ในกล่องประวัติ
+        var detailHtml = item.detail ? '<div class="history-detail">' + item.detail + '</div>' : '';
+
         container.innerHTML +=
           '<div class="history-card">'
+          + '<div class="history-card-top">'
           + '<div class="history-left">'
           + '<div class="history-date">📅 ' + item.date + '</div>'
           + '<div class="history-action" style="color:' + actionColor + '">' + item.action + '</div>'
@@ -1157,6 +1002,8 @@
           + '<div class="history-time">' + item.time + '</div>'
           + '<div class="history-status ' + statusClass + '">' + item.status + '</div>'
           + '</div>'
+          + '</div>'
+          + detailHtml // แทรกกล่องข้อความสรุปละเอียดไว้ด้านล่าง
           + '</div>';
       });
     }
@@ -1169,16 +1016,12 @@
       document.getElementById('loadingText').textContent = text || "กำลังดำเนินการ...";
       document.getElementById('loadingOverlay').classList.add('active');
     }
-    function hideLoading() {
-      document.getElementById('loadingOverlay').classList.remove('active');
-    }
+    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
     function showToast(msg, type) {
       type = type || "success";
       var el = document.getElementById('toast');
-      el.textContent = msg;
-      el.className   = 'toast ' + type + ' show';
-      clearTimeout(el._t);
-      el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
+      el.textContent = msg; el.className = 'toast ' + type + ' show';
+      clearTimeout(el._t); el._t = setTimeout(function() { el.classList.remove('show'); }, 3000);
     }
 
     window.onload = init;
