@@ -17,6 +17,7 @@
       --border:    #2a3040;
       --accent:    #4f9eff;
       --accent2:   #7ec8a0;
+      --accent3:   #a855f7; /* สีใหม่สำหรับปุ่มตารางเข้าพัก (ม่วง) */
       --warn:      #f5a623;
       --danger:    #e05c5c;
       --text:      #e8edf5;
@@ -84,7 +85,6 @@
     .status-dot.error   { background: var(--danger); box-shadow: 0 0 6px var(--danger); animation: none; }
     @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
     
-    /* --- เพิ่ม Style สำหรับแถบสถานะห้องพัก --- */
     .booking-bar {
       width: 100%;
       max-width: 420px;
@@ -93,7 +93,7 @@
       background: rgba(79, 158, 255, 0.08);
       border: 1px dashed rgba(79, 158, 255, 0.4);
       border-radius: var(--radius);
-      display: none; /* ซ่อนไว้ก่อนจนกว่าจะโหลดเสร็จ */
+      display: none; 
       align-items: center;
       gap: 12px;
       font-size: 14px;
@@ -102,7 +102,6 @@
     .booking-icon { font-size: 20px; flex-shrink: 0; }
     .booking-text { flex: 1; line-height: 1.4; }
     .booking-highlight { color: var(--accent); font-weight: 700; font-size: 15px; }
-    /* ----------------------------------- */
 
     .container {
       width: 100%;
@@ -152,6 +151,8 @@
     .menu-card.green:hover  { border-color: var(--accent2); }
     .menu-card.orange:hover { border-color: var(--warn); }
     .menu-card.red:hover    { border-color: var(--danger); }
+    .menu-card.purple:hover { border-color: var(--accent3); } /* Hover สีม่วง */
+
     .menu-icon {
       width: 48px; height: 48px;
       border-radius: 12px;
@@ -163,6 +164,8 @@
     .menu-icon.blue   { background: rgba(79,158,255,0.12); }
     .menu-icon.orange { background: rgba(245,166,35,0.12); }
     .menu-icon.red    { background: rgba(224,92,92,0.12); }
+    .menu-icon.purple { background: rgba(168,85,247,0.12); } /* พื้นหลังสีม่วง */
+
     .menu-info { flex: 1; }
     .menu-label { font-size: 15px; font-weight: 600; }
     .menu-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
@@ -332,6 +335,80 @@
     .summary-item:not(:last-child) { border-right: 1px solid var(--border); }
     .summary-val { font-size: 16px; font-weight: 700; color: var(--text); }
     .summary-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* --- สไตล์สำหรับตารางเข้าพักแบบ Card (ล่วงหน้า 14 วัน) --- */
+    .schedule-day-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .schedule-day-header {
+      background: var(--surface2);
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .schedule-day-header.is-today {
+      background: rgba(168, 85, 247, 0.15); /* เน้นสีม่วงสำหรับวันนี้ */
+      color: var(--accent3);
+      border-bottom-color: rgba(168, 85, 247, 0.3);
+    }
+    .schedule-room-list {
+      padding: 8px 16px;
+    }
+    .schedule-room-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .schedule-room-item:last-child {
+      border-bottom: none;
+    }
+    .room-badge {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.05);
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-right: 12px;
+      min-width: 45px;
+      text-align: center;
+    }
+    .room-details {
+      flex: 1;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .room-name-text {
+      color: var(--text-muted);
+      font-size: 11px;
+      display: block;
+      margin-top: 2px;
+    }
+    /* สีสถานะ */
+    .status-checkin  .room-badge { color: var(--accent2); background: rgba(126,200,160,0.1); border: 1px solid rgba(126,200,160,0.3); }
+    .status-stay     .room-badge { color: #facc15; background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.3); }
+    .status-checkout .room-badge { color: #f87171; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); }
+    
+    .status-checkin  .status-text { color: var(--accent2); font-weight: 500; }
+    .status-stay     .status-text { color: #facc15; font-weight: 500; }
+    .status-checkout .status-text { color: #f87171; font-weight: 500; }
+
+    .empty-day-msg {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 12px 0;
+      text-align: center;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -374,6 +451,18 @@
           </div>
           <div class="menu-arrow">›</div>
         </div>
+        
+        <!-- --- ปุ่มตารางเข้าพักใหม่ --- -->
+        <div class="menu-card purple" onclick="openScheduleSection()">
+          <div class="menu-icon purple">📅</div>
+          <div class="menu-info">
+            <div class="menu-label">ตารางเข้าพัก (14 วัน)</div>
+            <div class="menu-desc">ดูคิวห้องพักล่วงหน้า</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+        <!-- ----------------------- -->
+
         <div class="menu-card orange" onclick="openLeaveSection()">
           <div class="menu-icon orange">📝</div>
           <div class="menu-info">
@@ -408,6 +497,23 @@
         </div>
       </div>
     </div>
+
+    <!-- --- Section ตารางเข้าพักใหม่ --- -->
+    <div id="scheduleSec" class="section">
+      <div class="section-title" style="margin-top:8px">ตารางห้องพักล่วงหน้า 14 วัน</div>
+      
+      <div class="note" style="border-color: var(--accent3); background: rgba(168,85,247,0.08); color: var(--accent3);">
+        💡 สัญลักษณ์สี: <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ(เหลือง)</span>, <span style="color:#f87171">เช็คเอาท์(แดง)</span>
+      </div>
+
+      <div id="scheduleListContainer">
+        <!-- ข้อมูลตารางจะถูก Gen มาใส่ตรงนี้ -->
+      </div>
+      
+      <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('scheduleSec')">← กลับเมนูหลัก</button>
+    </div>
+    <!-- ----------------------- -->
+
 
     <div id="historySec" class="section">
       <div class="section-title" style="margin-top:8px">ประวัติการลงเวลา(60 รายการล่าสุด)</div>
@@ -529,49 +635,57 @@
 
   <script>
     // ===== State =====
-    var profile    = {};
-    var loc        = null;
+    var profile    = { userId: "Umock1234", displayName: "Tester (Preview Mode)" }; // Mock for canvas
+    var loc        = { lat: 14.619000, lng: 101.630000 }; // Mock for canvas
     var imageB64   = { checkin: "", spot: "", issue: "" };
     var submitting = false;
 
-    // ===== GAS URL =====
+    // ===== GAS URL (เอาไว้ทดสอบ) =====
     var GAS_URL = "https://script.google.com/macros/s/AKfycbwyx7wTCYGi7g0Rc5uZhT0RJxbPKMZK8UtLjwYtGx8zJ70x14bSP_rt2efqxujSscZa/exec";
 
-    // ===== Init LIFF =====
+    // ===== Init (ปรับแต่งเล็กน้อยสำหรับดู Preview ใน Canvas) =====
     async function init() {
-      try {
-        await liff.init({ liffId: "2010215863-7qiQMJWd" });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
+      // สำหรับการรันบนเว็บจริง เปิด LIFF ตามปกติ
+      if(typeof liff !== 'undefined' && liff.init) {
+          try {
+            await liff.init({ liffId: "2010215863-7qiQMJWd" });
+            if (!liff.isLoggedIn()) { liff.login(); return; }
 
-        profile = await liff.getProfile();
-        document.getElementById('headerSub').textContent = profile.displayName;
+            profile = await liff.getProfile();
+            document.getElementById('headerSub').textContent = profile.displayName;
 
-        setStatus("loading", "กำลังรับตำแหน่ง GPS...");
-        navigator.geolocation.getCurrentPosition(
-          function(pos) {
-            loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
-            
-            // เรียกฟังก์ชันดึงสถานะห้องพักทันทีที่พร้อมใช้งาน
-            fetchBookingStatus();
-          },
-          function(err) {
-            var msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
-            setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
-            fetchBookingStatus(); // ถึง GPS พลาดก็ให้ดึงสถานะห้องพักมาแสดง
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-      } catch (e) {
-        setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
+            setStatus("loading", "กำลังรับตำแหน่ง GPS...");
+            navigator.geolocation.getCurrentPosition(
+              function(pos) {
+                loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
+                fetchBookingStatus();
+              },
+              function(err) {
+                var msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
+                setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
+                fetchBookingStatus(); 
+              },
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+          } catch (e) {
+            setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
+          }
+      } else {
+          // ถ้าเปิดใน Canvas ให้ใช้ Mock Data
+          document.getElementById('headerSub').textContent = profile.displayName;
+          setStatus("ok", "พร้อมใช้งาน · โหมดทดสอบ (Canvas)");
+          
+          // จำลองข้อมูลหน้าหลัก
+          document.getElementById('bookingBar').style.display = 'flex';
+          document.getElementById('bookingText').innerHTML = "ใช้ห้อง: <span class='booking-highlight'>A3</span> | รอเช็คเอาท์: <span class='booking-highlight'>A4</span>";
       }
     }
 
-    // ฟังก์ชันใหม่สำหรับดึงข้อมูลห้องพักไปโชว์
     function fetchBookingStatus() {
       var bar = document.getElementById('bookingBar');
       var txt = document.getElementById('bookingText');
-      bar.style.display = 'flex'; // แสดงแถบตอนโหลด
+      bar.style.display = 'flex'; 
       
       fetch(GAS_URL, {
         method: "POST",
@@ -587,7 +701,7 @@
         }
       })
       .catch(function() {
-        bar.style.display = 'none'; // ซ่อนถ้ามี Error
+        bar.style.display = 'none'; 
       });
     }
 
@@ -619,6 +733,9 @@
       if (fromSection === 'historySec') {
         document.getElementById('historyList').innerHTML = "";
       }
+      if (fromSection === 'scheduleSec') {
+        document.getElementById('scheduleListContainer').innerHTML = "";
+      }
       if (fromSection === 'leaveSec') {
         document.getElementById('leaveDate').value    = "";
         document.getElementById('leaveEndDate').value = "";
@@ -632,6 +749,110 @@
       }
       showSection('mainMenu');
     }
+
+    // --- ฟังก์ชันดึงตาราง 14 วัน ---
+    function openScheduleSection() {
+      showLoading("กำลังโหลดตารางเข้าพัก...");
+      
+      // ดึงข้อมูลจาก GAS
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ type: 'get_booking_14days' })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        hideLoading();
+        if (res.success) {
+          renderScheduleList(res.data);
+          showSection('scheduleSec');
+        } else {
+          // ถ้าเปิดใน Canvas (ไม่มี GAS backend) ให้ใช้ Mock Data จำลอง
+          if(typeof liff === 'undefined' || !liff.init) {
+              renderMockSchedule();
+              showSection('scheduleSec');
+              return;
+          }
+          showToast(res.message || "ไม่สามารถดึงตารางได้", "error");
+        }
+      })
+      .catch(function(err) {
+        hideLoading();
+        // ถ้าเปิดใน Canvas ให้ใช้ Mock Data จำลอง
+        if(typeof liff === 'undefined' || !liff.init) {
+            renderMockSchedule();
+            showSection('scheduleSec');
+            return;
+        }
+        showToast("เกิดข้อผิดพลาดในการโหลดตาราง", "error");
+      });
+    }
+
+    // ฟังก์ชันวาด UI ตาราง 14 วัน
+    function renderScheduleList(data) {
+      var container = document.getElementById('scheduleListContainer');
+      container.innerHTML = "";
+      
+      if (!data || data.length === 0) {
+          container.innerHTML = '<div class="empty-day-msg">ไม่พบข้อมูลในตาราง</div>';
+          return;
+      }
+
+      var todayRaw = new Date();
+      todayRaw.setHours(0,0,0,0);
+      // เปลี่ยน timezone เป็น GMT+7 เพื่อเทียบ string ให้ชัวร์ (แบบง่าย)
+      var pad = function(n) { return n < 10 ? '0'+n : n; };
+      var todayStr = todayRaw.getFullYear() + '-' + pad(todayRaw.getMonth()+1) + '-' + pad(todayRaw.getDate());
+
+      data.forEach(function(day) {
+        // เช็คว่าใช่วันนี้ไหม (เอาไว้เปลี่ยนสี Header)
+        var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
+        var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
+
+        var html = '<div class="schedule-day-card">';
+        html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
+        
+        if (day.rooms.length === 0) {
+            html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
+        } else {
+            html += '<div class="schedule-room-list">';
+            day.rooms.forEach(function(r) {
+                var sClass = "status-" + r.status;
+                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "รอเช็คเอาท์";
+                
+                html += '<div class="schedule-room-item ' + sClass + '">';
+                html += '<div class="room-badge">' + r.room + '</div>';
+                html += '<div class="room-details">';
+                html += '<span class="status-text">' + sText + '</span>';
+                if (r.detail && r.detail !== "-") {
+                    html += '<span class="room-name-text">' + r.detail + '</span>';
+                }
+                html += '</div></div>';
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        container.innerHTML += html;
+      });
+    }
+    
+    // ข้อมูลจำลองสำหรับทดสอบใน Canvas
+    function renderMockSchedule() {
+        var mockData = [
+            { dateStr: "04/06/2026", rawDate: "2026-06-04", rooms: [
+                { room: "A3", status: "stay", detail: "คุณฟ้า 6/6/69--6+หมา2" },
+                { room: "A4", status: "checkout", detail: "" }
+            ]},
+            { dateStr: "05/06/2026", rawDate: "2026-06-05", rooms: []},
+            { dateStr: "06/06/2026", rawDate: "2026-06-06", rooms: [
+                { room: "A1", status: "checkin", detail: "คุณเอก 6/6/69" },
+                { room: "A3", status: "checkout", detail: "คุณฟ้า 6/6/69--6+หมา2" }
+            ]}
+        ];
+        renderScheduleList(mockData);
+    }
+    // -----------------------------------
+
 
     var lastPhotoTimestamp = { checkin: null, spot: null };
 
@@ -879,7 +1100,9 @@
         submitting = false;
         showToast(res.message, res.success ? "success" : "error");
         if (res.success) {
-          setTimeout(function() { liff.closeWindow(); }, 2200);
+          setTimeout(function() { 
+              if(typeof liff !== 'undefined' && liff.closeWindow) liff.closeWindow(); 
+          }, 2200);
         }
       })
       .catch(function() {
