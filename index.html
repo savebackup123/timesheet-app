@@ -84,7 +84,7 @@
     .status-dot.error   { background: var(--danger); box-shadow: 0 0 6px var(--danger); animation: none; }
     @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
     
-    /* --- แถบสถานะห้องพัก --- */
+    /* --- เพิ่ม Style สำหรับแถบสถานะห้องพัก --- */
     .booking-bar {
       width: 100%;
       max-width: 420px;
@@ -93,7 +93,7 @@
       background: rgba(79, 158, 255, 0.08);
       border: 1px dashed rgba(79, 158, 255, 0.4);
       border-radius: var(--radius);
-      display: none;
+      display: none; /* ซ่อนไว้ก่อนจนกว่าจะโหลดเสร็จ */
       align-items: center;
       gap: 12px;
       font-size: 14px;
@@ -102,6 +102,7 @@
     .booking-icon { font-size: 20px; flex-shrink: 0; }
     .booking-text { flex: 1; line-height: 1.4; }
     .booking-highlight { color: var(--accent); font-weight: 700; font-size: 15px; }
+    /* ----------------------------------- */
 
     .container {
       width: 100%;
@@ -542,20 +543,6 @@
         await liff.init({ liffId: "2010215863-7qiQMJWd" });
         if (!liff.isLoggedIn()) { liff.login(); return; }
 
-        // --- 💡 โค้ดบังคับแอดเพื่อน (วิธีที่ 3) ---
-        const friendship = await liff.getFriendship();
-        if (!friendship.friendFlag) {
-          document.getElementById('headerSub').textContent = "ยังไม่ได้เพิ่มเพื่อน";
-          setStatus("error", "⚠️ กรุณาเพิ่มเพื่อน (Add Friend) ก่อนใช้งาน");
-          alert("คุณยังไม่ได้เพิ่มเพื่อนกับบอท!\n\nกรุณากดเพิ่มเพื่อนก่อน เพื่อให้ระบบสามารถแจ้งเตือนงานต่างๆ ผ่านแชทส่วนตัวของคุณได้ครับ");
-          
-          // ล็อกเมนูให้เป็นสีเทา กดไม่ได้
-          document.getElementById('mainMenu').style.pointerEvents = 'none';
-          document.getElementById('mainMenu').style.opacity = '0.4';
-          return; // หยุดการทำงานทันที
-        }
-        // ------------------------------------
-
         profile = await liff.getProfile();
         document.getElementById('headerSub').textContent = profile.displayName;
 
@@ -565,12 +552,13 @@
             loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
             
+            // เรียกฟังก์ชันดึงสถานะห้องพักทันทีที่พร้อมใช้งาน
             fetchBookingStatus();
           },
           function(err) {
             var msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
             setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
-            fetchBookingStatus(); 
+            fetchBookingStatus(); // ถึง GPS พลาดก็ให้ดึงสถานะห้องพักมาแสดง
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
@@ -579,10 +567,11 @@
       }
     }
 
+    // ฟังก์ชันใหม่สำหรับดึงข้อมูลห้องพักไปโชว์
     function fetchBookingStatus() {
       var bar = document.getElementById('bookingBar');
       var txt = document.getElementById('bookingText');
-      bar.style.display = 'flex'; 
+      bar.style.display = 'flex'; // แสดงแถบตอนโหลด
       
       fetch(GAS_URL, {
         method: "POST",
@@ -598,7 +587,7 @@
         }
       })
       .catch(function() {
-        bar.style.display = 'none'; 
+        bar.style.display = 'none'; // ซ่อนถ้ามี Error
       });
     }
 
