@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน</title>
+  <title>ระบบจัดการเวลาทำงาน mdf</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -367,7 +367,7 @@
         <div class="menu-card blue" onclick="showSection('spotSec')">
           <div class="menu-icon blue">🎯</div>
           <div class="menu-info">
-            <div class="menu-label">ส่งงานสุ่มตรวจ</div>
+            <div class="menu-label">ส่งงานสุ่มเช็ค</div>
             <div class="menu-desc">ถ่ายภาพรายงานพิกัดระหว่างวัน</div>
           </div>
           <div class="menu-arrow">›</div>
@@ -407,7 +407,7 @@
     </div>
 
     <div id="spotSec" class="section">
-      <div class="section-title" style="margin-top:8px">ส่งงานสุ่มตรวจ (Spot Check)</div>
+      <div class="section-title" style="margin-top:8px">ส่งงานสุ่มเช็ค (Spot Check)</div>
       <input type="file" id="spotImgInput" accept="image/*" capture="environment" style="display:none"
              onchange="handleImage(event,'spotPreview','spotUpload')">
       <div class="upload-area" id="spotUpload" onclick="document.getElementById('spotImgInput').click()">
