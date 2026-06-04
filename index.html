@@ -744,7 +744,7 @@
         var html = '<div class="schedule-day-card">';
         html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
         if (day.rooms.length === 0) {
-            html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
+            html += '<div class="empty-day-msg">ไม่มีลูกค้า (วิลล่าว่าง)</div>';
         } else {
             html += '<div class="schedule-room-list">';
             day.rooms.forEach(function(r) {
