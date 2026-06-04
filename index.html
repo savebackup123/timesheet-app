@@ -678,7 +678,7 @@
           
           // จำลองข้อมูลหน้าหลัก
           document.getElementById('bookingBar').style.display = 'flex';
-          document.getElementById('bookingText').innerHTML = "ใช้ห้อง: <span class='booking-highlight'>A3</span> | วันเช็คเอาท์: <span class='booking-highlight'>A4</span>";
+          document.getElementById('bookingText').innerHTML = "ใช้ห้อง: <span class='booking-highlight'>A3</span> | รอเช็คเอาท์: <span class='booking-highlight'>A4</span>";
       }
     }
 
@@ -818,7 +818,7 @@
             html += '<div class="schedule-room-list">';
             day.rooms.forEach(function(r) {
                 var sClass = "status-" + r.status;
-                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
+                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "รอเช็คเอาท์";
                 
                 html += '<div class="schedule-room-item ' + sClass + '">';
                 html += '<div class="room-badge">' + r.room + '</div>';
