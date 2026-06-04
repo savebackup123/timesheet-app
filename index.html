@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.3.1.0</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.3.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -31,6 +31,19 @@
       font-family: var(--font);
       background: var(--bg);
       color: var(--text); 
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 40px;
+      overflow-x: hidden;
+    }
+    .header {
+      width: 100%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px 14px;
+      display: flex;
       align-items: center;
       gap: 12px;
       position: sticky;
@@ -44,10 +57,12 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
       flex-shrink: 0;
+      color: #ffffff;
     }
     .header-text { flex: 1; }
     .header-title { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
     .header-sub   { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-top: 1px; }
+    
     .status-bar {
       width: 100%;
       max-width: 420px;
@@ -299,7 +314,7 @@
       border-radius: var(--radius);
       padding: 14px 16px;
       display: flex;
-      flex-direction: column; /* เปลี่ยนเป็น column เพื่อให้มีพื้นที่ใส่ detail */
+      flex-direction: column; 
       gap: 10px;
     }
     .history-card-top {
@@ -396,7 +411,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Modal ป๊อปอัปแสดงข้อความสรุป -->
   <div class="modal-overlay" id="summaryModal">
     <div class="modal-box">
       <div class="modal-title">📌 สรุปรายการ</div>
@@ -408,7 +422,7 @@
   <div class="header">
     <div class="header-icon">⏱</div>
     <div class="header-text">
-      <div class="header-title">ระบบจัดการเวลาทำงาน mdf v3.1</div>
+      <div class="header-title">ระบบจัดการเวลาทำงาน mdf</div>
       <div class="header-sub" id="headerSub">กำลังเชื่อมต่อ...</div>
     </div>
   </div>
@@ -1015,3 +1029,4 @@
   </script>
 </body>
 </html>
+}
