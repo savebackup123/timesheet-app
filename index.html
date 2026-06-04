@@ -30,7 +30,7 @@
     body {
       font-family: var(--font);
       background: var(--bg);
-      color: var(--text); 
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -57,12 +57,11 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
       flex-shrink: 0;
-      color: #ffffff;
+      color: #fff;
     }
     .header-text { flex: 1; }
     .header-title { font-size: 15px; font-weight: 600; letter-spacing: 0.01em; }
     .header-sub   { font-size: 11px; color: var(--text-muted); font-family: var(--mono); margin-top: 1px; }
-    
     .status-bar {
       width: 100%;
       max-width: 420px;
@@ -422,7 +421,7 @@
   <div class="header">
     <div class="header-icon">⏱</div>
     <div class="header-text">
-      <div class="header-title">ระบบจัดการเวลาทำงาน mdf</div>
+      <div class="header-title">ระบบจัดการเวลาทำงาน mdf v.3.2</div>
       <div class="header-sub" id="headerSub">กำลังเชื่อมต่อ...</div>
     </div>
   </div>
@@ -498,7 +497,7 @@
     <div id="scheduleSec" class="section">
       <div class="section-title" style="margin-top:8px">ตารางห้องพักล่วงหน้า 14 วัน</div>
       <div class="note" style="border-color: var(--accent3); background: rgba(168,85,247,0.08); color: var(--accent3);">
-        💡  <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ/สวน(เหลือง)</span>, <span style="color:#f87171">จะเช็คเอาท์(แดง)</span>
+        💡 สัญลักษณ์สี: <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ(เหลือง)</span>, <span style="color:#f87171">เช็คเอาท์(แดง)</span>
       </div>
       <div id="scheduleListContainer"></div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('scheduleSec')">← กลับเมนูหลัก</button>
@@ -621,13 +620,13 @@
 
   <script>
     // ===== State =====
-    var profile    = { userId: "Umock1234", displayName: "Tester (Preview Mode)" }; 
-    var loc        = { lat: 14.619000, lng: 101.630000 }; 
+    var profile    = { userId: "Umock1234", displayName: "Tester" }; 
+    var loc        = null;
     var imageB64   = { checkin: "", spot: "", issue: "" };
     var submitting = false;
 
-    // ===== GAS URL (เอาไว้ทดสอบ) =====
-    var GAS_URL = "https://script.google.com/macros/s/AKfycbwyx7wTCYGi7g0Rc5uZhT0RJxbPKMZK8UtLjwYtGx8zJ70x14bSP_rt2efqxujSscZa/exec";
+    // ⚠️ แอดมินต้องเอา URL Web App มาใส่ตรงนี้ (ห้ามลืมเครื่องหมาย " หน้าและหลัง)
+    var GAS_URL = "ให้เอาลิงก์_Web_App_ของคุณมาวางแทนที่ตรงนี้นะครับ";
 
     // ===== Init =====
     async function init() {
@@ -739,41 +738,30 @@
       var todayStr = todayRaw.getFullYear() + '-' + pad(todayRaw.getMonth()+1) + '-' + pad(todayRaw.getDate());
 
       data.forEach(function(day) {
-      var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
-      var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
-      
-      // --- 💡 ส่วนที่เพิ่มเข้ามาใหม่: หาชื่อวันภาษาไทย ---
-      var daysTH = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
-      var parts = day.rawDate.split('-'); // แยก yyyy-mm-dd
-      var d = new Date(parts[0], parts[1] - 1, parts[2]); // สร้างเป็นวันที่
-      var dayName = "วัน" + daysTH[d.getDay()]; // จะได้ผลลัพธ์ เช่น "วันจันทร์"
-      // ------------------------------------------
-
-      var html = '<div class="schedule-day-card">';
-      
-      // --- 💡 แก้ไขบรรทัดนี้: เปลี่ยนอีโมจิเป็น 🗓️ และใส่ชื่อวันเข้าไป ---
-      html += '<div class="schedule-day-header' + isTodayClass + '">🗓️ ' + dayName + ' ที่ ' + day.dateStr + todayBadge + '</div>';
-      // ------------------------------------------
-      
-      if (day.rooms.length === 0) {
-          html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
-      } else {
-          html += '<div class="schedule-room-list">';
-          day.rooms.forEach(function(r) {
-              var sClass = "status-" + r.status;
-              var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
-              html += '<div class="schedule-room-item ' + sClass + '">';
-              html += '<div class="room-badge">' + r.room + '</div>';
-              html += '<div class="room-details">';
-              html += '<span class="status-text">' + sText + '</span>';
-              if (r.detail && r.detail !== "-") { html += '<span class="room-name-text">' + r.detail + '</span>'; }
-              html += '</div></div>';
-          });
-          html += '</div>';
-      }
-      html += '</div>';
-      container.innerHTML += html;
-    });
+        var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
+        var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
+        var html = '<div class="schedule-day-card">';
+        html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
+        if (day.rooms.length === 0) {
+            html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
+        } else {
+            html += '<div class="schedule-room-list">';
+            day.rooms.forEach(function(r) {
+                var sClass = "status-" + r.status;
+                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
+                html += '<div class="schedule-room-item ' + sClass + '">';
+                html += '<div class="room-badge">' + r.room + '</div>';
+                html += '<div class="room-details">';
+                html += '<span class="status-text">' + sText + '</span>';
+                if (r.detail && r.detail !== "-") { html += '<span class="room-name-text">' + r.detail + '</span>'; }
+                html += '</div></div>';
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        container.innerHTML += html;
+      });
+    }
 
     var lastPhotoTimestamp = { checkin: null, spot: null };
     function handleImage(e, previewId, uploadId) {
@@ -957,7 +945,6 @@
         submitting = false;
         showToast(res.message, res.success ? "success" : "error");
         
-        // ถ้าระบบส่งกลับมาพร้อมข้อความสรุป ให้โชว์ Modal ค้างไว้ แทนการปิดแอปอัตโนมัติ
         if (res.success && res.summaryAlert) {
             document.getElementById('summaryModalText').textContent = res.summaryAlert;
             document.getElementById('summaryModal').classList.add('active');
@@ -971,7 +958,6 @@
       });
     }
 
-    // ฟังก์ชันปิด Modal (เมื่อพนักงานกดปุ่ม ตกลง)
     function closeSummaryModal() {
         document.getElementById('summaryModal').classList.remove('active');
         if(typeof liff !== 'undefined' && liff.closeWindow) liff.closeWindow(); 
@@ -1000,7 +986,6 @@
         var actionColor = item.action === 'เข้างาน' ? 'var(--accent2)' : 'var(--danger)';
         var statusClass = item.status === 'สำเร็จ' ? 'ok' : 'fail';
         
-        // ถ้ามีรายละเอียดสรุป (Detail) ให้ดึงมาแสดงไว้ในกล่องประวัติ
         var detailHtml = item.detail ? '<div class="history-detail">' + item.detail + '</div>' : '';
 
         container.innerHTML +=
@@ -1015,7 +1000,7 @@
           + '<div class="history-status ' + statusClass + '">' + item.status + '</div>'
           + '</div>'
           + '</div>'
-          + detailHtml // แทรกกล่องข้อความสรุปละเอียดไว้ด้านล่าง
+          + detailHtml 
           + '</div>';
       });
     }
@@ -1040,4 +1025,3 @@
   </script>
 </body>
 </html>
-
