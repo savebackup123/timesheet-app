@@ -83,6 +83,27 @@
     .status-dot.loading { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
     .status-dot.error   { background: var(--danger); box-shadow: 0 0 6px var(--danger); animation: none; }
     @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+    
+    /* --- เพิ่ม Style สำหรับแถบสถานะห้องพัก --- */
+    .booking-bar {
+      width: 100%;
+      max-width: 420px;
+      margin: 12px 20px 0;
+      padding: 12px 16px;
+      background: rgba(79, 158, 255, 0.08);
+      border: 1px dashed rgba(79, 158, 255, 0.4);
+      border-radius: var(--radius);
+      display: none; /* ซ่อนไว้ก่อนจนกว่าจะโหลดเสร็จ */
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .booking-icon { font-size: 20px; flex-shrink: 0; }
+    .booking-text { flex: 1; line-height: 1.4; }
+    .booking-highlight { color: var(--accent); font-weight: 700; font-size: 15px; }
+    /* ----------------------------------- */
+
     .container {
       width: 100%;
       max-width: 420px;
@@ -335,6 +356,11 @@
     <span id="statusText">กำลังโหลด กรุณายิ้มรอสักครู่...</span>
   </div>
 
+  <div class="booking-bar" id="bookingBar">
+    <div class="booking-icon">🏡</div>
+    <div class="booking-text" id="bookingText">กำลังตรวจสอบการเข้าพัก...</div>
+  </div>
+
   <div class="container">
 
     <div id="mainMenu" class="section active">
@@ -525,16 +551,44 @@
           function(pos) {
             loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             setStatus("ok", "พร้อมใช้งาน · " + profile.displayName);
+            
+            // เรียกฟังก์ชันดึงสถานะห้องพักทันทีที่พร้อมใช้งาน
+            fetchBookingStatus();
           },
           function(err) {
             var msgs = { 1: "ถูกปฏิเสธการเข้าถึง GPS", 2: "ไม่พบสัญญาณ GPS", 3: "GPS หมดเวลา" };
             setStatus("error", (msgs[err.code] || "ไม่พบ GPS") + " — บางฟีเจอร์อาจไม่ทำงาน");
+            fetchBookingStatus(); // ถึง GPS พลาดก็ให้ดึงสถานะห้องพักมาแสดง
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
       } catch (e) {
         setStatus("error", "เชื่อมต่อ LIFF ล้มเหลว: " + e.message);
       }
+    }
+
+    // ฟังก์ชันใหม่สำหรับดึงข้อมูลห้องพักไปโชว์
+    function fetchBookingStatus() {
+      var bar = document.getElementById('bookingBar');
+      var txt = document.getElementById('bookingText');
+      bar.style.display = 'flex'; // แสดงแถบตอนโหลด
+      
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ type: 'get_booking_status' })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res.success) {
+          txt.innerHTML = res.message;
+        } else {
+          bar.style.display = 'none';
+        }
+      })
+      .catch(function() {
+        bar.style.display = 'none'; // ซ่อนถ้ามี Error
+      });
     }
 
     function showSection(id) {
@@ -596,11 +650,9 @@
         var dateStr = EXIF.getTag(this, "DateTimeOriginal");
         var takenDate;
 
-        // เช็คว่าผู้ใช้ใช้ iPhone/iPad หรือไม่
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
         if (dateStr) {
-          // กรณีมีข้อมูล EXIF ครบถ้วน (ถ่ายจากกล้องจริงๆ)
           var parts     = dateStr.split(' ');
           var dateParts = parts[0].split(':');
           var timeParts = parts[1].split(':');
@@ -609,12 +661,9 @@
             parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])
           );
         } else {
-          // กรณีไม่มี EXIF (อาจจะเป็นรูปแคปหน้าจอ, รูปเซฟมา, หรือถูก iPhone ลบทิ้ง)
           if (isIOS) {
-            // อนุโลมให้ iPhone: ใช้เวลาอัปเดตไฟล์ล่าสุดแทน
             takenDate = new Date(file.lastModified);
           } else {
-            // กฎเหล็ก Android: ถ้าไม่มี EXIF แปลว่าไปเลือกรูปแกลลอรี่มาแน่นอน บล็อกทันที!
             hideLoading();
             showToast("ไม่อนุญาตให้ใช้รูปแคปหน้าจอ กรุณาถ่ายจากกล้องสดเท่านั้น ❌", "error");
             e.target.value = "";
@@ -625,7 +674,6 @@
         var currentTime  = new Date();
         var diffMinutes  = Math.abs(currentTime - takenDate) / (1000 * 60);
 
-        // ให้เวลายืดหยุ่นเป็น 5 นาที เผื่อเครื่องประมวลผลช้า
         if (diffMinutes > 5) {
           hideLoading();
           showToast("รูปภาพเก่าเกินไป (" + Math.floor(diffMinutes) + " นาทีที่แล้ว) กรุณาถ่ายใหม่ ❌", "error");
