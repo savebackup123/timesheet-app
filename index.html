@@ -497,7 +497,7 @@
     <div id="scheduleSec" class="section">
       <div class="section-title" style="margin-top:8px">ตารางห้องพักล่วงหน้า 14 วัน</div>
       <div class="note" style="border-color: var(--accent3); background: rgba(168,85,247,0.08); color: var(--accent3);">
-        💡 สัญลักษณ์สี: <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ(เหลือง)</span>, <span style="color:#f87171">เช็คเอาท์(แดง)</span>
+        💡  <span style="color:var(--accent2)">เข้าพัก(เขียว)</span>, <span style="color:#facc15">พักต่อ,สวน(เหลือง)</span>, <span style="color:#f87171">จะเช็คเอาท์(แดง)</span>
       </div>
       <div id="scheduleListContainer"></div>
       <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('scheduleSec')">← กลับเมนูหลัก</button>
@@ -743,12 +743,12 @@
         var html = '<div class="schedule-day-card">';
         html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
         if (day.rooms.length === 0) {
-            html += '<div class="empty-day-msg">ไม่มีลูกค้า (บ้านว่าง)</div>';
+            html += '<div class="empty-day-msg">ไม่มีลูกค้า(วิลล่าว่าง)</div>';
         } else {
             html += '<div class="schedule-room-list">';
             day.rooms.forEach(function(r) {
                 var sClass = "status-" + r.status;
-                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ" : "ห้องเช็คเอาท์";
+                var sText  = r.status === "checkin" ? "รอเข้าพัก" : r.status === "stay" ? "พักต่อ,สวน" : "จะห้องเช็คเอาท์";
                 html += '<div class="schedule-room-item ' + sClass + '">';
                 html += '<div class="room-badge">' + r.room + '</div>';
                 html += '<div class="room-details">';
