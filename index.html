@@ -391,12 +391,18 @@
 
     <div id="checkinSec" class="section">
       <div class="section-title" style="margin-top:8px">ลงเวลาเข้า-ออก</div>
-      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none"
+      
+      <div class="note" style="margin-bottom: 12px; border-color: var(--accent); background: rgba(79,158,255,0.08); color: var(--accent);">
+        ✨ <b>Front Office:</b> วันที่มีลูกค้า ตอนเข้างานให้ "ถ่ายเซลฟี่หน้าตัวเอง" เพื่อตรวจการแต่งกาย (ออกงานถ่ายสถานที่ปกติ)
+      </div>
+
+      <input type="file" id="cameraInput" accept="image/*" capture style="display:none"
              onchange="handleImage(event,'checkinPreview','checkinUpload')">
+      
       <div class="upload-area" id="checkinUpload" onclick="document.getElementById('cameraInput').click()">
         <div class="upload-icon">📷</div>
-        <div class="upload-text">ถ่ายภาพสถานที่</div>
-        <div class="upload-sub">แตะเพื่อเปิดกล้อง</div>
+        <div class="upload-text">ถ่ายภาพสถานที่ / เซลฟี่ (Front)</div>
+        <div class="upload-sub">แตะเพื่อเปิดกล้อง (สลับกล้องหน้าได้)</div>
       </div>
       <img id="checkinPreview" src="" style="display:none">
       <div class="btn-row">
