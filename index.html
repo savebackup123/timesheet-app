@@ -101,7 +101,7 @@
       color: var(--text);
     }
     .booking-icon { font-size: 20px; flex-shrink: 0; }
-    .booking-text { flex: 1; line-height: 1.4; }
+    .booking-text { flex: 1; line-height: 1.4; overflow: hidden; }
     .booking-highlight { color: var(--accent); font-weight: 700; font-size: 15px; }
 
     .container {
@@ -669,7 +669,23 @@
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ type: 'get_booking_status' })
       }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) { txt.innerHTML = res.message; } 
+        if (res.success) { 
+            // บังคับข้อความให้เป็นบรรทัดเดียวเพื่อวัดขนาดเทียบกับจอมือถือ
+            txt.innerHTML = '<div style="white-space: nowrap; display: inline-block;">' + res.message + '</div>';
+            
+            // ให้เวลาเบราว์เซอร์คำนวณขนาดเสี้ยววินาที แล้วประมวลผล
+            setTimeout(function() {
+                var innerDiv = txt.firstChild;
+                // ถ้าความกว้างข้อความ ยาวกว่าหน้าจอมือถือพนักงาน
+                if (innerDiv.scrollWidth > txt.clientWidth) {
+                    // เปลี่ยนให้กลายเป็นตัววิ่งอัตโนมัติ (scrollamount คือความเร็ว)
+                    txt.innerHTML = '<marquee scrollamount="4">' + res.message + '</marquee>';
+                } else {
+                    // ถ้าไม่เกิน ก็แสดงข้อความปกติ
+                    txt.innerHTML = res.message;
+                }
+            }, 50);
+        } 
         else { bar.style.display = 'none'; }
       }).catch(function() { bar.style.display = 'none'; });
     }
