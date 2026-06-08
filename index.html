@@ -869,6 +869,16 @@
     function submitData(type) {
       if (!loc)              { showToast("ไม่พบ GPS — กรุณาเปิดตำแหน่งที่ตั้ง", "error"); return; }
       if (!imageB64.checkin) { showToast("กรุณาถ่ายภาพก่อนบันทึก", "error"); return; }
+      
+      // --- แก้ไข: เปลี่ยนข้อความปุ่มตามที่คุณต้องการ ---
+      var btnId = (type === 'เข้างาน') ? 'btnIn' : 'btnOut';
+      var btn = document.getElementById(btnId);
+      var originalText = btn.innerText;
+      
+      btn.innerText = "กำลังบันทึกและตรวจสอบ...";
+      btn.disabled = true; // ล็อกปุ่มไว้กันพนักงานกดส่งรูปซ้ำ
+      // ------------------------------------------
+
       sendPayload({
         userId:           profile.userId,
         displayName:      profile.displayName,
@@ -877,7 +887,7 @@
         imageB64:         imageB64.checkin,
         photoTimestamp:   lastPhotoTimestamp.checkin,
         type:             type
-      });
+      }, btn, originalText); // ส่งตัวแปรปุ่มไปด้วยเพื่อจะได้คืนค่าให้ตอนเสร็จ
     }
 
     function submitSpotCheck() {
@@ -949,7 +959,8 @@
       }).catch(function() { hideLoading(); showToast("เกิดข้อผิดพลาดในการโหลดข้อมูล", "error"); showSection('leaveSec'); });
     }
 
-    function sendPayload(payload) {
+    // --- แก้ไข: รับตัวแปรปุ่มมาเพื่อคืนค่า ---
+    function sendPayload(payload, btnElement, originalText) {
       if (submitting) return;
       submitting = true;
       showLoading("กำลังดำเนินการ...");
@@ -959,6 +970,13 @@
       }).then(function(r) { return r.json(); }).then(function(res) {
         hideLoading();
         submitting = false;
+
+        // คืนค่าข้อความปุ่มกลับมาเหมือนเดิม
+        if (btnElement && originalText) {
+          btnElement.innerText = originalText;
+          btnElement.disabled = false;
+        }
+
         showToast(res.message, res.success ? "success" : "error");
         
         if (res.success && res.summaryAlert) {
@@ -970,7 +988,14 @@
       }).catch(function() {
         hideLoading();
         submitting = false;
-        showToast("เกิดข้อผิดพลาด กรุณาลองใหม่ ❌", "error");
+
+        // คืนค่าข้อความปุ่มกลับมาเหมือนเดิมกรณี Error
+        if (btnElement && originalText) {
+          btnElement.innerText = originalText;
+          btnElement.disabled = false;
+        }
+
+        showToast("ระบบขัดข้องหรือสัญญาณเน็ตไม่ดี กรุณาลองใหม่ครับ ❌", "error");
       });
     }
 
