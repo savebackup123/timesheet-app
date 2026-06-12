@@ -454,7 +454,7 @@
         </div>
         
         <div class="menu-card purple" onclick="openScheduleSection()">
-          <div class="menu-icon purple">📅</div>
+          <div class="menu-icon purple">🗓️</div>
           <div class="menu-info">
             <div class="menu-label">ตารางเข้าพัก (14 วัน)</div>
             <div class="menu-desc">ดูคิวห้องพักล่วงหน้า</div>
@@ -760,7 +760,7 @@
         var isTodayClass = (day.rawDate === todayStr) ? ' is-today' : '';
         var todayBadge   = (day.rawDate === todayStr) ? ' 📌 วันนี้' : '';
         var html = '<div class="schedule-day-card">';
-        html += '<div class="schedule-day-header' + isTodayClass + '">📅 ' + day.dateStr + todayBadge + '</div>';
+        html += '<div class="schedule-day-header' + isTodayClass + '">🗓️ ' + day.dateStr + todayBadge + '</div>';
         if (day.rooms.length === 0) {
             html += '<div class="empty-day-msg">ไม่มีลูกค้า(วิลล่าว่าง)</div>';
         } else {
@@ -1071,7 +1071,7 @@
           '<div class="history-card">'
           + '<div class="history-card-top">'
           + '<div class="history-left">'
-          + '<div class="history-date">📅 ' + item.date + '</div>'
+          + '<div class="history-date">🗓️ ' + item.date + '</div>'
           + '<div class="history-action" style="color:' + actionColor + '">' + item.action + '</div>'
           + '</div>'
           + '<div class="history-right">'
