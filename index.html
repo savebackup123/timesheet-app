@@ -861,11 +861,15 @@
       var isCheckin = uploadId === 'checkinUpload';
       var isSpot    = uploadId === 'spotUpload';
       var icon = (isCheckin || isSpot) ? '📷' : '🖼';
-      var text = isCheckin ? 'ถ่ายภาพสถานที่' : isSpot ? 'ถ่ายภาพจุดที่ได้รับมอบหมาย' : 'แนบภาพหลักฐาน';
-      var sub  = (isCheckin || isSpot) ? 'แตะเพื่อเปิดกล้อง' : 'ไม่บังคับ — แตะเพื่อเลือกภาพ';
+      var text = isCheckin ? 'ถ่ายภาพสถานที่ / เซลฟี่ (Front)' : isSpot ? 'ถ่ายภาพจุดที่ได้รับมอบหมาย' : 'แนบภาพหลักฐาน';
+      var sub  = isCheckin ? 'แตะเพื่อเปิดกล้อง (สลับกล้องหน้าได้)' : isSpot ? 'บังคับเปิดพิกัด GPS ปัจจุบัน' : 'ไม่บังคับ — แตะเพื่อเลือกภาพ';
       var inp  = isCheckin ? 'cameraInput' : isSpot ? 'spotImgInput' : 'issueImgInput';
+      
+      // เพิ่มคำเตือนเฉพาะหน้าสุ่มเช็ค
+      var extraWarning = isSpot ? '<div class="upload-sub" style="color: var(--danger); margin-top: 6px; font-weight: 500;">⚠️ หากภารกิจไม่ถูกต้องหรือขาดส่ง 3 ครั้ง/เดือน ระบบจะ -OT 3 ชม.</div>' : '';
+
       el.classList.remove('has-image');
-      el.innerHTML = '<div class="upload-icon">' + icon + '</div><div class="upload-text">' + text + '</div><div class="upload-sub">'  + sub  + '</div>';
+      el.innerHTML = '<div class="upload-icon">' + icon + '</div><div class="upload-text">' + text + '</div><div class="upload-sub">'  + sub  + '</div>' + extraWarning;
       el.onclick = (function(i) { return function() { document.getElementById(i).click(); }; })(inp);
       document.getElementById(previewId).src = "";
     }
