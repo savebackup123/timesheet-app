@@ -1038,7 +1038,7 @@
         
         // 3. จัดการข้อความรายละเอียด และทำให้ลิงก์สามารถกดคลิกได้
         var detailText = item.detail || '';
-        detailText = detailText.replace(/(https?:\/\/[^\s]+)/g, '<br><a href="$1" target="_blank" style="color:var(--accent); text-decoration:underline; word-break:break-all;">คลิกดูรูปภาพหลักฐาน ↗</a>');
+        detailText = detailText.replace(/(https?:\/\/[^\s]+)/g, ' <a href="$1" target="_blank" style="color:var(--accent); text-decoration:underline; word-break:break-all;">คลิกดูรูปภาพหลักฐาน ↗</a>');
 
         var detailHtml = detailText ? '<div class="history-detail">' + detailText + '</div>' : '';
 
