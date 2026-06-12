@@ -1027,10 +1027,20 @@
         return;
       }
       data.forEach(function(item) {
-        var actionColor = item.action === 'เข้างาน' ? 'var(--accent2)' : 'var(--danger)';
-        var statusClass = item.status === 'สำเร็จ' ? 'ok' : 'fail';
+        // 1. กำหนดสีของประเภท Action (เข้างาน = เขียว, ออกงาน = แดง, สุ่มเช็ค = ฟ้า)
+        var actionColor = 'var(--text)';
+        if (item.action === 'เข้างาน') actionColor = 'var(--accent2)';
+        else if (item.action === 'ออกงาน') actionColor = 'var(--danger)';
+        else if (item.action === 'สุ่มเช็ค') actionColor = 'var(--accent)';
         
-        var detailHtml = item.detail ? '<div class="history-detail">' + item.detail + '</div>' : '';
+        // 2. กำหนดสีพื้นหลังของป้าย Status (สำเร็จ หรือ ผ่าน = สีเขียว ok)
+        var statusClass = (item.status === 'สำเร็จ' || item.status === 'ผ่าน') ? 'ok' : 'fail';
+        
+        // 3. จัดการข้อความรายละเอียด และทำให้ลิงก์สามารถกดคลิกได้
+        var detailText = item.detail || '';
+        detailText = detailText.replace(/(https?:\/\/[^\s]+)/g, '<br><a href="$1" target="_blank" style="color:var(--accent); text-decoration:underline; word-break:break-all;">คลิกดูรูปภาพหลักฐาน ↗</a>');
+
+        var detailHtml = detailText ? '<div class="history-detail">' + detailText + '</div>' : '';
 
         container.innerHTML +=
           '<div class="history-card">'
