@@ -579,6 +579,14 @@
       <div class="note">⚠️ การลางานในวันที่มีลูกค้าหรือทำห้อง จะต้องชดเชยเวลา 2 เท่า</div>
       
       <div class="field">
+        <label>วันที่เริ่มลา</label>
+        <input type="date" id="leaveDate">
+      </div>
+      <div class="field">
+        <label>ถึงวันที่</label>
+        <input type="date" id="leaveEndDate">
+      </div>
+      <div class="field">
         <label>ประเภทการลา</label>
         <select id="leaveType" onchange="toggleLeaveType()">
           <option value="ลาป่วย">🤒 ลาป่วย</option>
@@ -595,13 +603,6 @@
         </select>
       </div>
       <div class="field" id="deductTypeContainer">
-        <label>รูปแบบชดเชยเวลา (กรณีมีลูกค้า)</label>
-        <select id="deductType">
-          <option value="ot">⏱️ หักจากชั่วโมงโอที (วันละ 8 ชม.)</option>
-          <option value="holiday">🗓️ หักจากวันหยุดนักขัตฤกษ์ (วันละ 1 วัน)</option>
-        </select>
-      </div>
-      <div class="field">
         <label>รูปแบบชดเชยเวลา (กรณีมีลูกค้า)</label>
         <select id="deductType">
           <option value="ot">⏱️ หักจากชั่วโมงโอที (วันละ 8 ชม.)</option>
