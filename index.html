@@ -935,13 +935,26 @@
       });
     }
 
+    function toggleLeaveType() {
+      var lType = document.getElementById('leaveType').value;
+      var deductContainer = document.getElementById('deductTypeContainer');
+      if (lType === 'ลาพักร้อน') {
+        deductContainer.style.display = 'none'; // ซ่อนตัวเลือก หากเป็นลาพักร้อน
+      } else {
+        deductContainer.style.display = 'block';
+      }
+    }
+    
     function submitLeave() {
       var lDate    = document.getElementById('leaveDate').value;
       var lEndDate = document.getElementById('leaveEndDate').value;
       var deductType = document.getElementById('deductType').value; 
+      var duration   = document.getElementById('leaveDuration').value; // เพิ่มดึงค่า 0.5 วัน
+      
       if (!lDate)    { showToast("กรุณาระบุวันที่เริ่มลา", "error"); return; }
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
       if (new Date(lEndDate) < new Date(lDate)) { showToast("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มลา", "error"); return; }
+      
       sendPayload({
         userId:       profile.userId,
         displayName:  profile.displayName,
@@ -949,6 +962,7 @@
         leaveDate:    lDate,
         leaveEndDate: lEndDate,
         leaveType:    document.getElementById('leaveType').value,
+        leaveDuration: duration,
         deductType:   deductType
       });
     }
@@ -963,8 +977,12 @@
         if (res.success) {
           document.getElementById('otVal').textContent            = res.otHours;
           document.getElementById('holidayVal').textContent       = res.holidayBalance !== undefined ? res.holidayBalance : "-";
+          document.getElementById('vacationVal').textContent      = res.vacationBalance !== undefined ? res.vacationBalance : "-"; // เพิ่มโชว์พักร้อน
           document.getElementById('leaveApprovedVal').textContent = res.totalApprovedDays;
           document.getElementById('leavePendingVal').textContent  = res.pendingDays;
+          
+          toggleLeaveType(); // สั่งรัน 1 ครั้งเพื่อรีเซ็ตหน้าจอ
+          
           var listHtml = '';
           if (res.leaveHistory && res.leaveHistory.length > 0) {
             res.leaveHistory.forEach(function(item) {
