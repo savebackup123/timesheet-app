@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.3.6</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.3.7</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -402,6 +402,116 @@
       white-space: pre-wrap; font-family: inherit; margin-bottom: 20px; 
     }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    /* --- Announcement & Dashboard Styles --- */
+    .announcement-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 4px solid var(--accent); /* Default is Blue info */
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: fadeUp 0.3s ease;
+    }
+    .announcement-card.warning { border-left-color: var(--warn); }
+    .announcement-card.danger { border-left-color: var(--danger); }
+    .announcement-card.success { border-left-color: var(--accent2); }
+    .announcement-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .announcement-content { font-size: 12px; color: var(--text-muted); line-height: 1.4; white-space: pre-wrap; }
+
+    .analytics-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .analytics-card.main-hours {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .analytics-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 8px;
+    }
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .analytics-card-small {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .analytics-small-icon {
+      font-size: 20px;
+    }
+    .analytics-small-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .analytics-small-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .analytics-small-label {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .progress-ring-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+    .progress-ring__background {
+      stroke: var(--surface2);
+    }
+    .progress-ring__circle {
+      stroke: var(--accent);
+      transition: stroke-dashoffset 0.5s ease-in-out;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .progress-ring-text {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #hoursWorkedVal {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .progress-ring-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -442,6 +552,9 @@
   <div class="container">
 
     <div id="mainMenu" class="section active">
+      <!-- Announcement Container -->
+      <div id="announcementContainer" style="display:none; margin-top: 8px; margin-bottom: 16px; width: 100%;"></div>
+
       <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
       <div class="menu-grid">
         <div class="menu-card green" onclick="showSection('checkinSec')">
@@ -470,6 +583,15 @@
           </div>
           <div class="menu-arrow">›</div>
         </div>
+        
+        <div class="menu-card purple" onclick="openAnalyticsSection()">
+          <div class="menu-icon purple">📊</div>
+          <div class="menu-info">
+            <div class="menu-label">สรุปผลงานประจำเดือน</div>
+            <div class="menu-desc">ยอดชั่วโมงทำงาน, OT สะสม, สถิติสุ่มเช็ค</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
         <div class="menu-card red" onclick="showSection('reportSec')">
           <div class="menu-icon red">⚠️</div>
           <div class="menu-info">
@@ -495,6 +617,64 @@
           <div class="menu-arrow">›</div>
         </div>
       </div>
+    </div>
+
+    <div id="analyticsSec" class="section">
+      <div class="section-title" style="margin-top:8px">สรุปผลงานประจำเดือน</div>
+      
+      <div class="analytics-dashboard">
+        <!-- Circular Progress for Total Hours -->
+        <div class="analytics-card main-hours">
+          <div class="progress-ring-container">
+            <svg class="progress-ring" width="120" height="120">
+              <circle class="progress-ring__background" stroke="var(--border)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+              <circle class="progress-ring__circle" id="hoursProgressCircle" stroke="var(--accent)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+            </svg>
+            <div class="progress-ring-text">
+              <span id="hoursWorkedVal">0</span>
+              <span class="progress-ring-sub">/ 180 ชม.</span>
+            </div>
+          </div>
+          <div class="analytics-label">ชั่วโมงทำงานสะสมเดือนนี้</div>
+        </div>
+        
+        <!-- Metrics Grid -->
+        <div class="analytics-grid">
+          <div class="analytics-card-small">
+            <span class="analytics-small-icon">⏱️</span>
+            <div class="analytics-small-info">
+              <div class="analytics-small-val" id="analyticsOtVal">0 ชม.</div>
+              <div class="analytics-small-label">โอทีสะสม</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card-small">
+            <span class="analytics-small-icon">🌴</span>
+            <div class="analytics-small-info">
+              <div class="analytics-small-val" id="analyticsVacationVal">0 วัน</div>
+              <div class="analytics-small-label">พักร้อนคงเหลือ</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card-small">
+            <span class="analytics-small-icon">🎯</span>
+            <div class="analytics-small-info">
+              <div class="analytics-small-val" id="analyticsSpotCheckVal">0/3 ครั้ง</div>
+              <div class="analytics-small-label">สุ่มเช็คที่พลาด</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card-small">
+            <span class="analytics-small-icon">🗓️</span>
+            <div class="analytics-small-info">
+              <div class="analytics-small-val" id="analyticsHolidayVal">0 วัน</div>
+              <div class="analytics-small-label">วันหยุดสะสม</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn btn-ghost" style="margin-top:16px" onclick="goBack('analyticsSec')">← กลับเมนูหลัก</button>
     </div>
 
     <div id="scheduleSec" class="section">
@@ -683,26 +863,44 @@
       bar.style.display = 'flex'; 
       fetch(GAS_URL, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ type: 'get_booking_status' })
+        body: JSON.stringify({ 
+          type: 'get_booking_status',
+          userId: profile.userId,
+          displayName: profile.displayName
+        })
       }).then(function(r) { return r.json(); }).then(function(res) {
-        if (res.success) { 
-            // บังคับข้อความให้เป็นบรรทัดเดียวเพื่อวัดขนาดเทียบกับจอมือถือ
+        // แสดงข้อความสถานะห้องพัก
+        if (res.success && res.message) { 
             txt.innerHTML = '<div style="white-space: nowrap; display: inline-block;">' + res.message + '</div>';
-            
-            // ให้เวลาเบราว์เซอร์คำนวณขนาดเสี้ยววินาที แล้วประมวลผล
             setTimeout(function() {
                 var innerDiv = txt.firstChild;
-                // ถ้าความกว้างข้อความ ยาวกว่าหน้าจอมือถือพนักงาน
                 if (innerDiv.scrollWidth > txt.clientWidth) {
-                    // เปลี่ยนให้กลายเป็นตัววิ่งอัตโนมัติ (scrollamount คือความเร็ว)
                     txt.innerHTML = '<marquee scrollamount="4">' + res.message + '</marquee>';
                 } else {
-                    // ถ้าไม่เกิน ก็แสดงข้อความปกติ
                     txt.innerHTML = res.message;
                 }
             }, 50);
         } 
         else { bar.style.display = 'none'; }
+
+        // ดึงประกาศแจ้งเตือนระบบ (ถ้ามี)
+        if (res.announcements && res.announcements.length > 0) {
+          var announceContainer = document.getElementById('announcementContainer');
+          announceContainer.style.display = 'block';
+          var html = '';
+          res.announcements.forEach(function(ann) {
+            var sevClass = ann.severity || 'info';
+            html += '<div class="announcement-card ' + sevClass + '">';
+            html += '<div class="announcement-title">' + ann.title + '</div>';
+            if (ann.content) {
+              html += '<div class="announcement-content">' + ann.content + '</div>';
+            }
+            html += '</div>';
+          });
+          announceContainer.innerHTML = html;
+        } else {
+          document.getElementById('announcementContainer').style.display = 'none';
+        }
       }).catch(function() { bar.style.display = 'none'; });
     }
 
@@ -742,6 +940,14 @@
         document.getElementById('holidayVal').textContent       = "-";
         document.getElementById('leaveApprovedVal').textContent = "-";
         document.getElementById('leavePendingVal').textContent  = "-";
+      }
+      if (fromSection === 'analyticsSec') {
+        document.getElementById('hoursWorkedVal').textContent = "0";
+        document.getElementById('analyticsOtVal').textContent = "0 ชม.";
+        document.getElementById('analyticsHolidayVal').textContent = "-";
+        document.getElementById('analyticsVacationVal').textContent = "-";
+        document.getElementById('analyticsSpotCheckVal').textContent = "-";
+        setHoursProgress(0, 180);
       }
       showSection('mainMenu');
     }
@@ -1138,6 +1344,60 @@
       // ปรับเวลาจาก 3000 เป็น 6000 (โชว์ค้างไว้ 6 วินาทีให้อ่านทัน)
       clearTimeout(el._t); 
       el._t = setTimeout(function() { el.classList.remove('show'); }, 6000);
+    }
+
+    function openAnalyticsSection() {
+      showLoading("กำลังโหลดข้อมูลผลงานประจำเดือน...");
+      fetch(GAS_URL, {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ userId: profile.userId, displayName: profile.displayName, type: 'get_leave_info' })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        hideLoading();
+        if (res.success) {
+          // อัปเดตข้อมูลบนแดชบอร์ดสรุปผลงาน
+          document.getElementById('analyticsOtVal').textContent = res.otHours + " ชม.";
+          document.getElementById('analyticsHolidayVal').textContent = (res.holidayBalance !== undefined ? res.holidayBalance : "0") + " วัน";
+          document.getElementById('analyticsVacationVal').textContent = (res.vacationBalance !== undefined ? res.vacationBalance : "0") + " วัน";
+          
+          // จำนวนครั้งสุ่มเช็คที่พลาด
+          var missedVal = res.missedSpotChecksMTD !== undefined ? res.missedSpotChecksMTD : 0;
+          document.getElementById('analyticsSpotCheckVal').textContent = missedVal + "/3 ครั้ง";
+          
+          // ตกแต่งสีเตือนตามระดับความผิดพลาด
+          var spotCheckEl = document.getElementById('analyticsSpotCheckVal');
+          if (missedVal >= 3) {
+            spotCheckEl.style.color = 'var(--danger)';
+          } else if (missedVal === 2) {
+            spotCheckEl.style.color = 'var(--warn)';
+          } else {
+            spotCheckEl.style.color = 'var(--accent2)';
+          }
+          
+          // ดึงค่าชั่วโมงทำงานรวมสะสม MTD และวาดวงกลมเป้าหมาย (เกณฑ์ 180 ชม.)
+          var hoursWorked = res.hoursWorkedMTD !== undefined ? res.hoursWorkedMTD : 0;
+          document.getElementById('hoursWorkedVal').textContent = hoursWorked;
+          setHoursProgress(hoursWorked, 180);
+          
+          showSection('analyticsSec');
+        } else {
+          showToast("ไม่สามารถดึงข้อมูลผลงานได้", "error");
+        }
+      }).catch(function() {
+        hideLoading();
+        showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลผลงาน", "error");
+      });
+    }
+
+    function setHoursProgress(hours, targetHours) {
+      var circle = document.getElementById('hoursProgressCircle');
+      if (!circle) return;
+      var radius = circle.r.baseVal.value;
+      var circumference = radius * 2 * Math.PI;
+      circle.style.strokeDasharray = circumference + " " + circumference;
+      
+      var percent = Math.min(100, (hours / targetHours) * 100);
+      var offset = circumference - (percent / 100 * circumference);
+      circle.style.strokeDashoffset = offset;
     }
 
     window.onload = init;
