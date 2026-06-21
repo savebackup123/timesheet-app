@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.3.7</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.3.8</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -511,6 +511,123 @@
     .progress-ring-sub {
       font-size: 11px;
       color: var(--text-muted);
+    }
+    
+    /* --- Sunset Glassmorphism Enhancements --- */
+    .glass-card {
+      background: rgba(22, 26, 35, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .header-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(79, 158, 255, 0.35);
+    }
+    .timecard-panel {
+      margin-top: 14px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border: 1px solid rgba(244, 63, 94, 0.2); /* sunset glow border */
+      background: linear-gradient(135deg, rgba(30, 24, 45, 0.5), rgba(13, 15, 20, 0.5));
+    }
+    .timecard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .timecard-time {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--warn);
+      text-shadow: 0 0 8px rgba(245, 166, 35, 0.3);
+    }
+    .timecard-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .timecard-btn {
+      padding: 14px 10px;
+      border-radius: 12px;
+      border: none;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      color: #fff;
+    }
+    .timecard-btn.in {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+    .timecard-btn.out {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+    .timecard-btn:active {
+      transform: scale(0.95);
+      box-shadow: none;
+    }
+    .menu-grid-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .menu-grid-2x2 .menu-card {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 16px;
+      gap: 12px;
+      background: rgba(22, 26, 35, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .menu-grid-2x2 .menu-icon {
+      width: 42px; height: 42px;
+      font-size: 20px;
+      border-radius: 10px;
+    }
+    .menu-grid-2x2 .menu-label {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .menu-grid-2x2 .menu-desc {
+      font-size: 10px;
+      line-height: 1.3;
+      margin-top: 4px;
+      color: var(--text-muted);
+    }
+    .menu-grid-2x2 .menu-arrow {
+      display: none;
+    }
+    .pulse-glow {
+      animation: buttonPulse 1.5s infinite alternate;
+    }
+    @keyframes buttonPulse {
+      0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
+      100% { box-shadow: 0 0 20px rgba(79, 158, 255, 0.6); }
     }
   </style>
 </head>
