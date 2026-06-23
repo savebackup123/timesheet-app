@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.4.0</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.4.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -1701,6 +1701,17 @@
         }
 
         showToast(res.message, res.success ? "success" : "error");
+        
+        // อัปเดตสถานะการเข้างานของพนักงานบนหน้าจอทันทีเมื่อลงเวลาสำเร็จ
+        if (res.success && (payload.type === 'เข้างาน' || payload.type === 'ออกงาน')) {
+          window.userCheckinState = {
+            todayCheckedIn: (payload.type === 'เข้างาน'),
+            lastAction: payload.type,
+            checkinTime: (payload.type === 'เข้างาน') ? new Date().toISOString() : (window.userCheckinState ? window.userCheckinState.checkinTime : null),
+            checkoutTime: (payload.type === 'ออกงาน') ? new Date().toISOString() : null
+          };
+          updateUserCheckinUI();
+        }
         
         if (res.success && res.summaryAlert) {
             document.getElementById('summaryModalText').textContent = res.summaryAlert;
