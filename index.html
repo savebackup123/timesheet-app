@@ -1194,6 +1194,14 @@
       }
     }
 
+    function startLiveClock() {
+      var clockEl = document.getElementById('liveClock');
+      var dateEl = document.getElementById('liveDate');
+      if (!clockEl) return;
+      
+      var thaiDays = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+      var thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      
       function updateClock() {
         var now = new Date();
         var hrs = now.getHours();
@@ -1222,6 +1230,8 @@
       updateClock();
       setInterval(updateClock, 1000);
     }
+
+
 
     // ฟังก์ชันช่วยจัดการควบคุมการกระพริบแฟลชของปุ่มและการนับเวลางานเรียลไทม์
     function updateUserCheckinUI() {
