@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.3.9</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.4.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -29,11 +29,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font);
-      background: #0d0f14;
+      background: #151c28;
       background-image: 
-        radial-gradient(at 0% 0%, rgba(244, 63, 94, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(79, 158, 255, 0.08) 0px, transparent 60%);
+        radial-gradient(circle at 0% 30%, rgba(244, 63, 94, 0.24) 0%, transparent 65%),
+        radial-gradient(circle at 100% 20%, rgba(168, 85, 247, 0.24) 0%, transparent 65%),
+        radial-gradient(circle at 30% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
       background-attachment: fixed;
       color: var(--text);
       min-height: 100vh;
@@ -45,10 +45,10 @@
     }
     .header {
       width: 100%;
-      background: rgba(22, 26, 35, 0.6);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(22, 26, 35, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       padding: 18px 20px 14px;
       display: flex;
       align-items: center;
@@ -74,15 +74,16 @@
       max-width: 420px;
       margin: 20px 20px 0;
       padding: 12px 16px;
-      background: rgba(30, 36, 51, 0.45);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(22, 26, 35, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius);
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
     .status-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -100,16 +101,62 @@
       max-width: 420px;
       margin: 12px 20px 0;
       padding: 12px 16px;
-      background: rgba(79, 158, 255, 0.08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px dashed rgba(79, 158, 255, 0.35);
+      background: rgba(22, 26, 35, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius);
       display: none; 
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      font-size: 13px;
       color: var(--text);
+      box-shadow: 0 12px 30px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    .booking-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 6px;
+    }
+    .booking-badges-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .booking-badge-pill {
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      gap: 6px;
+    }
+    .booking-badge-pill.checkin {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent2);
+    }
+    .booking-badge-pill.stay {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: var(--warn);
+    }
+    .booking-badge-pill.checkout {
+      background: rgba(224, 92, 92, 0.15);
+      border: 1px solid rgba(224, 92, 92, 0.35);
+      color: var(--danger);
+    }
+    .booking-badge-rooms {
+      font-family: var(--mono);
+      font-weight: 700;
+      margin-left: 2px;
     }
     .booking-icon { font-size: 20px; flex-shrink: 0; }
     .booking-text { flex: 1; line-height: 1.4; overflow: hidden; }
@@ -172,11 +219,11 @@
       font-size: 22px;
       flex-shrink: 0;
     }
-    .menu-icon.green  { background: rgba(126,200,160,0.12); border: 1px solid rgba(126,200,160,0.25); }
-    .menu-icon.blue   { background: rgba(79,158,255,0.12); border: 1px solid rgba(79,158,255,0.25); }
-    .menu-icon.orange { background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.25); }
-    .menu-icon.red    { background: rgba(224,92,92,0.12); border: 1px solid rgba(224,92,92,0.25); }
-    .menu-icon.purple { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25); } 
+    .menu-icon.green  { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); color: #34d399; }
+    .menu-icon.blue   { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .menu-icon.orange { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2); color: #fb923c; }
+    .menu-icon.red    { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; }
+    .menu-icon.purple { background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); color: #c084fc; } 
 
     .menu-info { flex: 1; }
     .menu-label { font-size: 15px; font-weight: 600; }
@@ -531,13 +578,13 @@
     
     /* --- Sunset Glassmorphism Enhancements --- */
     .glass-card {
-      background: rgba(22, 26, 35, 0.45);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(22, 26, 35, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius);
       padding: 18px 20px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     .header-avatar {
@@ -557,11 +604,11 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      border: 1px solid rgba(244, 63, 94, 0.25); /* sunset glow border */
-      background: linear-gradient(135deg, rgba(30, 20, 45, 0.55), rgba(15, 17, 26, 0.55));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(22, 26, 35, 0.65);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 10px 40px 0 rgba(244, 63, 94, 0.12), 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
     .timecard-header {
       display: flex;
@@ -572,9 +619,17 @@
     }
     .timecard-time {
       font-family: var(--mono);
+      font-weight: 700;
+      color: #fc8366; /* glowing orange from mockup */
+      text-shadow: 0 0 15px rgba(252, 131, 102, 0.35);
+    }
+    .timecard-time span {
+      font-size: 16px;
       font-weight: 600;
-      color: var(--warn);
-      text-shadow: 0 0 8px rgba(245, 166, 35, 0.3);
+      color: rgba(252, 131, 102, 0.75);
+      margin-left: 6px;
+      text-transform: uppercase;
+      vertical-align: baseline;
     }
     .timecard-buttons {
       display: grid;
@@ -584,7 +639,6 @@
     .timecard-btn {
       padding: 14px 10px;
       border-radius: 12px;
-      border: none;
       font-family: var(--font);
       font-size: 14px;
       font-weight: 600;
@@ -593,20 +647,38 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       color: #fff;
     }
     .timecard-btn.in {
-      background: linear-gradient(135deg, #10b981, #059669);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, rgba(87, 201, 141, 0.8), rgba(57, 179, 142, 0.8));
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 24px rgba(57, 179, 142, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .timecard-btn.in:active {
+      transform: scale(0.96);
+    }
+    .timecard-btn.in:hover {
+      background: linear-gradient(135deg, rgba(87, 201, 141, 0.95), rgba(57, 179, 142, 0.95));
+      box-shadow: 0 10px 30px rgba(57, 179, 142, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
     }
     .timecard-btn.out {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      background: linear-gradient(135deg, rgba(251, 176, 108, 0.8), rgba(254, 136, 106, 0.8));
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 24px rgba(254, 136, 106, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
-    .timecard-btn:active {
-      transform: scale(0.95);
-      box-shadow: none;
+    .timecard-btn.out:active {
+      transform: scale(0.96);
+    }
+    .timecard-btn.out:hover {
+      background: linear-gradient(135deg, rgba(251, 176, 108, 0.95), rgba(254, 136, 106, 0.95));
+      box-shadow: 0 10px 30px rgba(254, 136, 106, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
     }
     .menu-grid-2x2 {
       display: grid;
@@ -618,22 +690,44 @@
       align-items: flex-start;
       padding: 14px 12px;
       gap: 8px;
-      background: rgba(22, 26, 35, 0.45);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(22, 26, 35, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      box-shadow: 0 12px 30px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --glow-color: rgba(255, 255, 255, 0.1);
+      --hover-border: rgba(255, 255, 255, 0.3);
+    }
+    .menu-card.purple {
+      --glow-color: rgba(168, 85, 247, 0.25);
+      --hover-border: rgba(168, 85, 247, 0.6);
+    }
+    .menu-card.orange {
+      --glow-color: rgba(245, 158, 11, 0.25);
+      --hover-border: rgba(245, 158, 11, 0.6);
+    }
+    .menu-card.green {
+      --glow-color: rgba(16, 185, 129, 0.25);
+      --hover-border: rgba(16, 185, 129, 0.6);
+    }
+    .menu-card.red {
+      --glow-color: rgba(239, 68, 68, 0.25);
+      --hover-border: rgba(239, 68, 68, 0.6);
+    }
+    .menu-card.blue {
+      --glow-color: rgba(59, 130, 246, 0.25);
+      --hover-border: rgba(59, 130, 246, 0.6);
     }
     .menu-grid-2x2 .menu-card:active {
-      transform: scale(0.96);
+      transform: scale(0.96) translateY(0);
     }
     .menu-grid-2x2 .menu-card:hover {
-      border-color: rgba(79, 158, 255, 0.3);
-      background: rgba(30, 36, 50, 0.55);
-      box-shadow: 0 10px 40px rgba(79, 158, 255, 0.15);
-      transform: translateY(-2px);
+      border-color: var(--hover-border);
+      background: rgba(22, 26, 35, 0.85);
+      box-shadow: 0 12px 40px var(--glow-color), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
     }
     .menu-grid-2x2 .menu-icon {
       width: 42px; height: 42px;
@@ -663,6 +757,29 @@
       0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); }
       100% { box-shadow: 0 0 20px rgba(79, 158, 255, 0.6); }
     }
+    .svg-icon {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+    .menu-icon .svg-icon {
+      width: 22px;
+      height: 22px;
+    }
+    .timecard-btn .svg-icon {
+      width: 18px;
+      height: 18px;
+    }
+    .booking-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .booking-dot.checkin { background: #10b981; box-shadow: 0 0 8px #10b981; }
+    .booking-dot.stay { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .booking-dot.checkout { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
   </style>
 </head>
 <body>
@@ -696,22 +813,41 @@
   </div>
 
   <div class="booking-bar" id="bookingBar">
-    <div class="booking-icon">🏡</div>
-    <div class="booking-text" id="bookingText">กำลังตรวจสอบการเข้าพัก...</div>
+    <div class="booking-header">
+      <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa; margin-right: 4px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>สถานะห้องพักวันนี้</span>
+    </div>
+    <div class="booking-badges-container" id="bookingBadgesContainer">
+      <!-- ป้ายสถานะห้องพักสีต่างๆ จะถูกใส่ที่นี่ -->
+    </div>
+    <div class="booking-text" id="bookingText" style="display:none;">กำลังตรวจสอบการเข้าพัก...</div>
   </div>
 
   <div class="container">
 
     <div id="mainMenu" class="section active">
       <!-- Quick Timecard Card -->
-      <div class="glass-card timecard-panel">
-        <div class="timecard-header">
-          <span>⏰ บันทึกเวลางานปัจจุบัน</span>
-          <span class="timecard-time" id="liveClock">00:00:00</span>
+      <div class="glass-card timecard-panel" style="align-items: center; text-align: center; padding: 22px 20px;">
+        <div style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--text-muted);">
+          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #fb923c; width: 16px; height: 16px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>บันทึกเวลางานปัจจุบัน</span>
         </div>
-        <div class="timecard-buttons">
-          <button class="timecard-btn in" id="quickBtnIn" onclick="openQuickPunch('เข้างาน')">เข้างาน ✅</button>
-          <button class="timecard-btn out" id="quickBtnOut" onclick="openQuickPunch('ออกงาน')">ออกงาน 🔴</button>
+        <div style="margin: 12px 0 16px 0;">
+          <div class="timecard-time" id="liveClock" style="font-size: 38px; letter-spacing: 0.05em; display: flex; align-items: baseline; justify-content: center;">00:00</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 6px;">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted); width: 14px; height: 14px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <div id="liveDate" style="font-size: 12px; color: var(--text-muted); font-weight: 500;"></div>
+          </div>
+        </div>
+        <div class="timecard-buttons" style="width: 100%;">
+          <button class="timecard-btn in" id="quickBtnIn" onclick="openQuickPunch('เข้างาน')">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            เข้างาน
+          </button>
+          <button class="timecard-btn out" id="quickBtnOut" onclick="openQuickPunch('ออกงาน')">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            ออกงาน
+          </button>
         </div>
       </div>
 
@@ -721,23 +857,29 @@
       <div class="section-title" style="margin-top:8px">เมนูหลัก</div>
       <div class="menu-grid-2x2">
         <div class="menu-card purple" onclick="openScheduleSection()">
-          <div class="menu-icon purple">🗓️</div>
+          <div class="menu-icon purple">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">ตารางเข้าพัก (14 วัน)</div>
             <div class="menu-desc">ดูคิวห้องพักล่วงหน้า</div>
           </div>
         </div>
 
-        <div class="menu-card orange" onclick="openLeaveSection()">
-          <div class="menu-icon orange">📝</div>
+        <div class="menu-card green" onclick="openLeaveSection()">
+          <div class="menu-icon green">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">แจ้งลางาน</div>
             <div class="menu-desc">เช็คสิทธิ / ส่งใบลา</div>
           </div>
         </div>
         
-        <div class="menu-card purple" onclick="openAnalyticsSection()">
-          <div class="menu-icon purple">📊</div>
+        <div class="menu-card orange" onclick="openAnalyticsSection()">
+          <div class="menu-icon orange">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">สรุปผลงานประจำเดือน</div>
             <div class="menu-desc">ยอดชั่วโมงทำงาน, OT สะสม, สถิติสุ่มเช็ค</div>
@@ -745,7 +887,9 @@
         </div>
 
         <div class="menu-card red" onclick="showSection('reportSec')">
-          <div class="menu-icon red">⚠️</div>
+          <div class="menu-icon red">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">แจ้งปัญหาเวลา</div>
             <div class="menu-desc">ส่งรายงานไปให้แอดมิน</div>
@@ -753,7 +897,9 @@
         </div>
 
         <div class="menu-card blue" onclick="showSection('spotSec')">
-          <div class="menu-icon blue">🎯</div>
+          <div class="menu-icon blue">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">ส่งงานสุ่มเช็ค</div>
             <div class="menu-desc">ถ่ายภาพรายงานที่ได้รับมอบหมาย</div>
@@ -761,7 +907,9 @@
         </div>
 
         <div class="menu-card blue" onclick="fetchHistory()">
-          <div class="menu-icon blue">🕒</div>
+          <div class="menu-icon blue">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline><line x1="12" y1="7" x2="12" y2="12"></line><line x1="12" y1="12" x2="16" y2="14"></line></svg>
+          </div>
           <div class="menu-info">
             <div class="menu-label">ประวัติของฉัน</div>
             <div class="menu-desc">ดูเวลาเข้า-ออก และงานสุ่มเช็คย้อนหลัง</div>
@@ -1018,13 +1166,31 @@
 
     function startLiveClock() {
       var clockEl = document.getElementById('liveClock');
+      var dateEl = document.getElementById('liveDate');
       if (!clockEl) return;
+      
+      var thaiDays = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+      var thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      
       function updateClock() {
         var now = new Date();
-        var hrs = String(now.getHours()).padStart(2, '0');
+        var hrs = now.getHours();
         var mins = String(now.getMinutes()).padStart(2, '0');
-        var secs = String(now.getSeconds()).padStart(2, '0');
-        clockEl.textContent = hrs + ':' + mins + ':' + secs;
+        var ampm = hrs >= 12 ? 'PM' : 'AM';
+        
+        // 12-hour format
+        var displayHrs = hrs % 12 || 12;
+        var displayHrsStr = String(displayHrs).padStart(2, '0');
+        
+        clockEl.innerHTML = displayHrsStr + ':' + mins + ' <span>' + ampm + '</span>';
+        
+        if (dateEl) {
+          var dayName = thaiDays[now.getDay()];
+          var date = now.getDate();
+          var monthName = thaiMonths[now.getMonth()];
+          var year = now.getFullYear() + 543; // พ.ศ.
+          dateEl.textContent = dayName + ", " + date + " " + monthName + " " + year;
+        }
       }
       updateClock();
       setInterval(updateClock, 1000);
@@ -1040,6 +1206,8 @@
     function fetchBookingStatus() {
       var bar = document.getElementById('bookingBar');
       var txt = document.getElementById('bookingText');
+      var header = document.querySelector('.booking-header');
+      var badgesContainer = document.getElementById('bookingBadgesContainer');
       bar.style.display = 'flex'; 
       fetch(GAS_URL, {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1049,17 +1217,33 @@
           displayName: profile.displayName
         })
       }).then(function(r) { return r.json(); }).then(function(res) {
-        // แสดงข้อความสถานะห้องพัก
-        if (res.success && res.message) { 
-            txt.innerHTML = '<div style="white-space: nowrap; display: inline-block;">' + res.message + '</div>';
-            setTimeout(function() {
-                var innerDiv = txt.firstChild;
-                if (innerDiv.scrollWidth > txt.clientWidth) {
-                    txt.innerHTML = '<marquee scrollamount="4">' + res.message + '</marquee>';
-                } else {
-                    txt.innerHTML = res.message;
-                }
-            }, 50);
+        if (res.success) {
+          var hasGuests = (res.checkinRooms && res.checkinRooms.length > 0) || 
+                          (res.checkoutRooms && res.checkoutRooms.length > 0) || 
+                          (res.stayRooms && res.stayRooms.length > 0);
+          
+          if (hasGuests) {
+            header.style.display = 'flex';
+            badgesContainer.style.display = 'flex';
+            txt.style.display = 'none';
+            
+            var html = '';
+            if (res.checkinRooms && res.checkinRooms.length > 0) {
+              html += '<div class="booking-badge-pill checkin"><span class="booking-dot checkin"></span> เช็คอิน: <span class="booking-badge-rooms">' + res.checkinRooms.join(", ") + '</span></div>';
+            }
+            if (res.stayRooms && res.stayRooms.length > 0) {
+              html += '<div class="booking-badge-pill stay"><span class="booking-dot stay"></span> พักต่อ/สวน: <span class="booking-badge-rooms">' + res.stayRooms.join(", ") + '</span></div>';
+            }
+            if (res.checkoutRooms && res.checkoutRooms.length > 0) {
+              html += '<div class="booking-badge-pill checkout"><span class="booking-dot checkout"></span> จะเช็คเอาท์: <span class="booking-badge-rooms">' + res.checkoutRooms.join(", ") + '</span></div>';
+            }
+            badgesContainer.innerHTML = html;
+          } else {
+            header.style.display = 'none';
+            badgesContainer.style.display = 'none';
+            txt.style.display = 'block';
+            txt.innerHTML = res.message || "🚨 ขณะนี้ไม่มีลูกค้า(วิลล่าว่าง)";
+          }
         } 
         else { bar.style.display = 'none'; }
 
