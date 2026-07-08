@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.4.2</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.4.3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -940,7 +940,7 @@
     </div>
 
     <div id="analyticsSec" class="section">
-      <div class="section-title" style="margin-top:8px">สรุปผลงานประจำเดือน</div>
+      <div class="section-title" style="margin-top:8px">สรุปผลงานประจำสัปดาห์</div>
       
       <div class="analytics-dashboard">
         <!-- Circular Progress for Total Hours -->
@@ -952,10 +952,10 @@
             </svg>
             <div class="progress-ring-text">
               <span id="hoursWorkedVal">0</span>
-              <span class="progress-ring-sub">/ 180 ชม.</span>
+              <span class="progress-ring-sub">/ 54 ชม.</span>
             </div>
           </div>
-          <div class="analytics-label">ชั่วโมงทำงานสะสมเดือนนี้</div>
+          <div class="analytics-label">ชั่วโมงทำงานสะสมสัปดาห์นี้</div>
         </div>
         
         <!-- Metrics Grid -->
@@ -1863,10 +1863,10 @@
             spotCheckEl.style.color = 'var(--accent2)';
           }
           
-          // ดึงค่าชั่วโมงทำงานรวมสะสม MTD และวาดวงกลมเป้าหมาย (เกณฑ์ 180 ชม.)
+          // ดึงค่าชั่วโมงทำงานรวมสะสม 7 วันย้อนหลัง และวาดวงกลมเป้าหมาย (เกณฑ์ 54 ชม.)
           var hoursWorked = res.hoursWorkedMTD !== undefined ? res.hoursWorkedMTD : 0;
           document.getElementById('hoursWorkedVal').textContent = hoursWorked;
-          setHoursProgress(hoursWorked, 180);
+          setHoursProgress(hoursWorked, 54);
           
           showSection('analyticsSec');
         } else {
