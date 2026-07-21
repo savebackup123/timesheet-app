@@ -1092,9 +1092,31 @@
           <option value="ลาป่วย">🤒 ลาป่วย</option>
           <option value="ลากิจ">📋 ลากิจ</option>
           <option value="ลาพักร้อน">🌴 ลาพักร้อน</option>
+          <option value="ลาโอที">⏰ ลาโอที (ชดเชยโอที)</option>
         </select>
       </div>
-      <div class="field">
+      <div class="field" id="leaveHoursContainer" style="display:none;">
+        <label>ระบุชั่วโมงลาโอที (0.5 - 8.0 ชั่วโมง)</label>
+        <select id="leaveHours">
+          <option value="0.5">0.5 ชั่วโมง (30 นาที)</option>
+          <option value="1.0">1.0 ชั่วโมง (60 นาที)</option>
+          <option value="1.5">1.5 ชั่วโมง (1 ชม. 30 นาที)</option>
+          <option value="2.0">2.0 ชั่วโมง (2 ชม.)</option>
+          <option value="2.5">2.5 ชั่วโมง (2 ชม. 30 นาที)</option>
+          <option value="3.0">3.0 ชั่วโมง (3 ชม.)</option>
+          <option value="3.5">3.5 ชั่วโมง (3 ชม. 30 นาที)</option>
+          <option value="4.0">4.0 ชั่วโมง (4 ชม. / ครึ่งวัน)</option>
+          <option value="4.5">4.5 ชั่วโมง (4 ชม. 30 นาที)</option>
+          <option value="5.0">5.0 ชั่วโมง (5 ชม.)</option>
+          <option value="5.5">5.5 ชั่วโมง (5 ชม. 30 นาที)</option>
+          <option value="6.0">6.0 ชั่วโมง (6 ชม.)</option>
+          <option value="6.5">6.5 ชั่วโมง (6 ชม. 30 นาที)</option>
+          <option value="7.0">7.0 ชั่วโมง (7 ชม.)</option>
+          <option value="7.5">7.5 ชั่วโมง (7 ชม. 30 นาที)</option>
+          <option value="8.0">8.0 ชั่วโมง (8 ชม. / เต็มวัน)</option>
+        </select>
+      </div>
+      <div class="field" id="leaveDurationContainer">
         <label>ระยะเวลา (ขั้นต่ำ 0.5 วัน)</label>
         <select id="leaveDuration">
           <option value="full">เต็มวัน (1 วัน)</option>
@@ -1624,18 +1646,31 @@
     function toggleLeaveType() {
       var lType = document.getElementById('leaveType').value;
       var deductContainer = document.getElementById('deductTypeContainer');
+      var hoursContainer = document.getElementById('leaveHoursContainer');
+      var durationContainer = document.getElementById('leaveDurationContainer');
+      
       if (lType === 'ลาพักร้อน') {
-        deductContainer.style.display = 'none'; // ซ่อนตัวเลือก หากเป็นลาพักร้อน
+        deductContainer.style.display = 'none';
+        if (hoursContainer) hoursContainer.style.display = 'none';
+        if (durationContainer) durationContainer.style.display = 'block';
+      } else if (lType === 'ลาโอที' || lType === 'ลาชดเชยโอที') {
+        deductContainer.style.display = 'none';
+        if (hoursContainer) hoursContainer.style.display = 'block';
+        if (durationContainer) durationContainer.style.display = 'none';
       } else {
         deductContainer.style.display = 'block';
+        if (hoursContainer) hoursContainer.style.display = 'none';
+        if (durationContainer) durationContainer.style.display = 'block';
       }
     }
     
     function submitLeave() {
       var lDate    = document.getElementById('leaveDate').value;
       var lEndDate = document.getElementById('leaveEndDate').value;
+      var lType    = document.getElementById('leaveType').value;
       var deductType = document.getElementById('deductType').value; 
-      var duration   = document.getElementById('leaveDuration').value; // เพิ่มดึงค่า 0.5 วัน
+      var duration   = document.getElementById('leaveDuration').value;
+      var leaveHours = (lType === 'ลาโอที' || lType === 'ลาชดเชยโอที') ? document.getElementById('leaveHours').value : null;
       
       if (!lDate)    { showToast("กรุณาระบุวันที่เริ่มลา", "error"); return; }
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
@@ -1647,9 +1682,10 @@
         type:         'leave',
         leaveDate:    lDate,
         leaveEndDate: lEndDate,
-        leaveType:    document.getElementById('leaveType').value,
+        leaveType:    lType,
         leaveDuration: duration,
-        deductType:   deductType
+        leaveHours:   leaveHours,
+        deductType:   (lType === 'ลาโอที' || lType === 'ลาชดเชยโอที') ? 'ot' : deductType
       });
     }
 
