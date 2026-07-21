@@ -859,6 +859,10 @@
             <span class="booking-dot checkin" style="width: 6px; height: 6px; box-shadow: 0 0 4px #10b981;"></span>
             <span>เข้างานเมื่อ: <span id="lblCheckinTime" style="font-weight: 600; font-family: var(--mono);">--:--</span> · ทำงานแล้ว: <span id="lblCheckinDuration" style="font-weight: 600; font-family: var(--mono);">0 ชม. 0 นาที</span></span>
           </div>
+          <!-- แถบแสดงเวลาคาดการณ์เลิกงานตามสิทธิ์วันลา -->
+          <div id="expectedCheckoutContainer" style="display: none; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; font-size: 11px; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 20px; padding: 4px 12px; width: fit-content; margin-left: auto; margin-right: auto; color: var(--accent3);">
+            <span>🏁 <span id="lblExpectedCheckoutText">เวลาเลิกงานตามสิทธิ์: --:-- น.</span></span>
+          </div>
         </div>
         <div class="timecard-buttons" style="width: 100%;">
           <button class="timecard-btn in" id="quickBtnIn" onclick="openQuickPunch('เข้างาน')">
@@ -1289,6 +1293,19 @@
           lblDur.textContent = hours + ' ชม. ' + mins + ' นาที';
         }
         
+        // แสดงแถบเวลาเลิกงานตามสิทธิ์
+        var expContainer = document.getElementById('expectedCheckoutContainer');
+        var expText = document.getElementById('lblExpectedCheckoutText');
+        if (expContainer && expText && state.todayApprovedLeave) {
+          expContainer.style.display = 'flex';
+          var leaveInfo = state.todayApprovedLeave;
+          if (leaveInfo.expectedOutStr) {
+            expText.textContent = "เวลาเลิกงานตามสิทธิ์: " + leaveInfo.expectedOutStr + " น. (" + leaveInfo.title + ")";
+          } else {
+            expText.textContent = "มีใบลาอนุมัติ: " + leaveInfo.title;
+          }
+        }
+        
         // หากชั่วโมงทำงานเกิน 9 ชม. ให้ปุ่ม "ออกงาน" กระพริบแฟลชเตือน
         if (hours >= 9) {
           btnOut.classList.add('pulse-flash-out');
@@ -1382,7 +1399,8 @@
           todayCheckedIn: res.todayCheckedIn,
           lastAction: res.lastAction,
           checkinTime: res.checkinTime ? new Date(res.checkinTime) : null,
-          checkoutTime: res.checkoutTime ? new Date(res.checkoutTime) : null
+          checkoutTime: res.checkoutTime ? new Date(res.checkoutTime) : null,
+          todayApprovedLeave: res.todayApprovedLeave || null
         };
         updateUserCheckinUI();
       }).catch(function() { bar.style.display = 'none'; });
