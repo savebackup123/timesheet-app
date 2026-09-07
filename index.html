@@ -4,7 +4,7 @@
   <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ระบบจัดการเวลาทำงาน mdf v.4.5</title>
+  <title>ระบบจัดการเวลาทำงาน mdf v.4.6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -927,7 +927,7 @@
   <div class="modal-overlay" id="refundProofModal">
     <div class="modal-box" style="max-width: 380px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span>💊 ขอคืนสิทธิ์ OT ลาป่วย</span>
+        <span>💊 ขอคืนสิทธิ์วันลาป่วย</span>
         <button type="button" onclick="closeRefundModal()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; padding:4px;">✕</button>
       </div>
 
@@ -941,8 +941,8 @@
           <span><span id="refundModalDays" style="font-weight:600; color:var(--warn);">-</span> วัน</span>
         </div>
         <div style="display:flex; justify-content:space-between; border-top:1px dashed rgba(255,255,255,0.1); padding-top:6px; margin-top:4px;">
-          <span style="color:var(--text-muted);">คืนสิทธิ์ OT อัตโนมัติ:</span>
-          <span style="font-weight:700; color:var(--accent2); font-size:13px;">+<span id="refundModalHours">-</span> ชม.</span>
+          <span style="color:var(--text-muted);">คืนสิทธิ์อัตโนมัติ:</span>
+          <span style="font-weight:700; color:var(--accent2); font-size:13px;" id="refundModalTargetVal">-</span>
         </div>
       </div>
 
@@ -958,7 +958,7 @@
         <div class="refund-rule-item"><span>2.</span> <span>ซองยาที่ใช้แล้ว (มีระบุชื่อยา/ชื่อผู้ป่วย)</span></div>
         <div class="refund-rule-item"><span>3.</span> <span>หลักฐานการเข้าพบแพทย์ หรือ ใบรับรองแพทย์</span></div>
         <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.08); font-size:11px; color:#facc15;">
-          ⚡ <strong>ระบบจะคืน OT ให้อัตโนมัติทันที</strong> หลังได้รับหลักฐาน แอดมินจะตรวจสอบรูปภาพในภายหลัง
+          ⚡ <strong>ระบบจะคืนสิทธิ์ให้อัตโนมัติทันที</strong> หลังได้รับหลักฐาน แอดมินจะตรวจสอบรูปภาพในภายหลัง
         </div>
       </div>
 
@@ -1316,6 +1316,22 @@
           <option value="ot">⏱️ หักจากชั่วโมงโอที (วันละ 8 ชม.)</option>
           <option value="holiday">🗓️ หักจากวันหยุดนักขัตฤกษ์ (วันละ 1 วัน)</option>
         </select>
+      </div>
+
+      <div class="field" id="sickLeaveProofContainer" style="display:block;">
+        <label style="color:#93c5fd;">🩺 แนบหลักฐานซองยา / ใบเสร็จ (ไม่บังคับ — มีรูปใส่ได้เลย 1-5 รูป)</label>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:8px; line-height:1.4;">
+          * หากมีรูปซองยาหรือใบรับรองแพทย์ แนบได้เลยเพื่อรับสิทธิ์ลาป่วยโดยไม่ถูกหักโควตา (หรือค่อยกลับมาแนบในประวัติการลาทีหลังได้)
+        </div>
+        <input type="file" id="leaveProofInput" accept="image/*" multiple style="display:none;" onchange="handleLeaveFormProofImages(event)">
+        <button type="button" class="proof-upload-btn" onclick="triggerLeaveFormProofInput()">
+          <span>📷 แตะเพื่อถ่ายภาพหรือเลือกรูปซองยา/หลักฐาน</span>
+        </button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--text-muted);">
+          <span>รูปที่แนบ:</span>
+          <span><strong id="leaveFormImgCount" style="color:var(--accent);">0</strong> / 5 รูป</span>
+        </div>
+        <div class="proof-grid" id="leaveFormPreviewGrid"></div>
       </div>
 
       <button class="btn btn-warning" onclick="submitLeave()">ส่งคำขอลา 📝</button>
@@ -1927,7 +1943,12 @@
       var deductContainer = document.getElementById('deductTypeContainer');
       var hoursContainer = document.getElementById('leaveHoursContainer');
       var durationContainer = document.getElementById('leaveDurationContainer');
+      var sickProofContainer = document.getElementById('sickLeaveProofContainer');
       
+      if (sickProofContainer) {
+        sickProofContainer.style.display = (lType === 'ลาป่วย') ? 'block' : 'none';
+      }
+
       if (lType === 'ลาพักร้อน') {
         deductContainer.style.display = 'none';
         if (hoursContainer) hoursContainer.style.display = 'none';
@@ -1940,6 +1961,93 @@
         deductContainer.style.display = 'block';
         if (hoursContainer) hoursContainer.style.display = 'none';
         if (durationContainer) durationContainer.style.display = 'block';
+      }
+    }
+
+    var leaveFormProofImages = [];
+
+    function triggerLeaveFormProofInput() {
+      if (leaveFormProofImages.length >= 5) {
+        showToast("แนบครบ 5 รูปแล้วครับ หากต้องการเปลี่ยนรูปให้กดลบก่อน", "warning");
+        return;
+      }
+      var inp = document.getElementById('leaveProofInput');
+      inp.value = "";
+      inp.click();
+    }
+
+    function handleLeaveFormProofImages(e) {
+      var files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      var remainingSlots = 5 - leaveFormProofImages.length;
+      if (remainingSlots <= 0) {
+        showToast("แนบรูปได้สูงสุด 5 รูปครับ", "warning");
+        return;
+      }
+
+      if (files.length > remainingSlots) {
+        showToast("เพิ่มได้อีก " + remainingSlots + " รูปเท่านั้นครับ (ระบบเลือก " + remainingSlots + " รูปแรกให้)", "warning");
+        files = files.slice(0, remainingSlots);
+      }
+
+      showLoading("กำลังประมวลผลรูปภาพ...");
+      var promises = files.map(function(file) {
+        return new Promise(function(resolve) {
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            var img = new Image();
+            img.onload = function() {
+              var MAX_W = 1000;
+              var scale = Math.min(1, MAX_W / img.width);
+              var canvas = document.createElement('canvas');
+              canvas.width = Math.round(img.width * scale);
+              canvas.height = Math.round(img.height * scale);
+              canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL('image/jpeg', 0.75));
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(promises).then(function(b64List) {
+        hideLoading();
+        b64List.forEach(function(b64) {
+          if (leaveFormProofImages.length < 5) leaveFormProofImages.push(b64);
+        });
+        renderLeaveFormPreviews();
+      }).catch(function() {
+        hideLoading();
+        showToast("เกิดข้อผิดพลาดในการประมวลผลรูปภาพ", "error");
+      });
+    }
+
+    function removeLeaveFormImage(idx) {
+      if (idx >= 0 && idx < leaveFormProofImages.length) {
+        leaveFormProofImages.splice(idx, 1);
+        renderLeaveFormPreviews();
+      }
+    }
+
+    function renderLeaveFormPreviews() {
+      var grid = document.getElementById('leaveFormPreviewGrid');
+      var countEl = document.getElementById('leaveFormImgCount');
+      if (!grid || !countEl) return;
+      countEl.textContent = leaveFormProofImages.length;
+
+      if (leaveFormProofImages.length === 0) {
+        grid.innerHTML = '';
+      } else {
+        var html = '';
+        leaveFormProofImages.forEach(function(b64, i) {
+          html += '<div style="position:relative; width:100%; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.15); background:#000;">'
+                + '<img src="' + b64 + '" style="width:100%; height:100%; object-fit:cover;">'
+                + '<button type="button" onclick="removeLeaveFormImage(' + i + ')" style="position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(224,92,92,0.9); color:#fff; border:none; border-radius:50%; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</button>'
+                + '</div>';
+        });
+        grid.innerHTML = html;
       }
     }
     
@@ -1955,7 +2063,7 @@
       if (!lEndDate) { showToast("กรุณาระบุถึงวันที่", "error"); return; }
       if (new Date(lEndDate) < new Date(lDate)) { showToast("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มลา", "error"); return; }
       
-      sendPayload({
+      var payload = {
         userId:       profile.userId,
         displayName:  profile.displayName,
         type:         'leave',
@@ -1965,22 +2073,36 @@
         leaveDuration: duration,
         leaveHours:   leaveHours,
         deductType:   (lType === 'ลาโอที' || lType === 'ลาชดเชยโอที') ? 'ot' : deductType
-      });
+      };
+
+      if (lType === 'ลาป่วย' && leaveFormProofImages && leaveFormProofImages.length > 0) {
+        payload.images = leaveFormProofImages;
+      }
+
+      sendPayload(payload);
     }
 
-    // ===== 💊 ระบบขอคืนสิทธิ์ OT ลาป่วย (แนบหลักฐาน 1-5 รูป) =====
+    // ===== 💊 ระบบขอคืนสิทธิ์ OT / วันหยุด ลาป่วย (แนบหลักฐาน 1-5 รูป) =====
     var refundImages = [];
     var currentRefundLeaveRow = null;
     var currentRefundDays = 1;
+    var currentRefundDeductPref = 'ot';
 
-    function openRefundSickLeaveModal(row, start, end, days) {
+    function openRefundSickLeaveModal(row, start, end, days, deductPref) {
       currentRefundLeaveRow = row;
       currentRefundDays = days || 1;
+      currentRefundDeductPref = deductPref || 'ot';
       refundImages = [];
 
       document.getElementById('refundModalDate').textContent = start + (end !== start ? ' ถึง ' + end : '');
       document.getElementById('refundModalDays').textContent = days;
-      document.getElementById('refundModalHours').textContent = Math.round(days * 8);
+
+      var targetValEl = document.getElementById('refundModalTargetVal');
+      if (deductPref === 'holiday') {
+        targetValEl.textContent = '+' + days + ' วัน (วันหยุดนักขัตฤกษ์)';
+      } else {
+        targetValEl.textContent = '+' + Math.round(days * 8) + ' ชม. (ชั่วโมงโอที)';
+      }
 
       var alertBox = document.getElementById('refundWarningBox');
       if (days > 3) {
@@ -2107,7 +2229,7 @@
       var origText = submitBtn.innerText;
       submitBtn.innerText = "กำลังส่งหลักฐานและคืนสิทธิ์...";
       submitBtn.disabled = true;
-      showLoading("กำลังส่งหลักฐานและคืนสิทธิ์ OT ทันที...");
+      showLoading("กำลังส่งหลักฐานและคืนสิทธิ์ทันที...");
 
       fetch(GAS_URL, {
         method: "POST",
@@ -2135,6 +2257,9 @@
 
           if (res.newOTHours !== undefined) {
             document.getElementById('otVal').textContent = res.newOTHours;
+          }
+          if (res.newHolidayBalance !== undefined) {
+            document.getElementById('holidayVal').textContent = res.newHolidayBalance;
           }
 
           openLeaveSection();
@@ -2192,12 +2317,15 @@
               var sColor = item.status === 'อนุมัติ' ? 'var(--accent2)' : item.status === 'รอตรวจสอบ' ? 'var(--warn)' : 'var(--danger)';
               
               var refundActionHtml = '';
-              if (item.canRefundOT) {
-                var refundHours = Math.round(item.days * 8);
+              if (item.canRefund || item.canRefundOT) {
+                var isHol = (item.deductPref === 'holiday');
+                var deductBadge = isHol ? ('🗓️ หักวันหยุด (' + item.days + ' วัน)') : ('⏱️ หักโอที (' + Math.round(item.days * 8) + ' ชม.)');
+                var btnText     = isHol ? '💊 แนบหลักฐานขอคืนวันหยุด' : '💊 แนบหลักฐานขอคืน OT';
+
                 refundActionHtml = '<div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">'
-                  + '<span style="font-size:11px; color:#facc15;">⏱️ หักโอที (' + refundHours + ' ชม.)</span>'
-                  + '<button type="button" class="btn-refund-ot" onclick="openRefundSickLeaveModal(' + item.row + ', \'' + item.start + '\', \'' + item.end + '\', ' + item.days + ')">'
-                  + '💊 แนบหลักฐานขอคืน OT (1-5 รูป)'
+                  + '<span style="font-size:11px; color:#facc15;">' + deductBadge + '</span>'
+                  + '<button type="button" class="btn-refund-ot" onclick="openRefundSickLeaveModal(' + item.row + ', \'' + item.start + '\', \'' + item.end + '\', ' + item.days + ', \'' + (item.deductPref || 'ot') + '\')">'
+                  + btnText + ' (1-5 รูป)'
                   + '</button>'
                   + '</div>';
               } else if (item.isRefunded) {
@@ -2205,7 +2333,7 @@
                   ? '<button type="button" class="proof-badge-link" onclick=\'viewEvidenceImages(' + JSON.stringify(item.evidenceUrls) + ')\'>🔍 ดูรูป (' + item.evidenceUrls.length + ')</button>'
                   : '';
                 refundActionHtml = '<div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">'
-                  + '<span class="refund-badge-done">✨ คืนสิทธิ์ OT แล้ว (รอแอดมินตรวจรูป)</span>'
+                  + '<span class="refund-badge-done">✨ มีหลักฐาน/คืนสิทธิ์แล้ว (รอแอดมินตรวจรูป)</span>'
                   + proofBtn
                   + '</div>';
               }
