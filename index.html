@@ -1170,6 +1170,65 @@
     // ⚠️ แอดมินต้องเอา URL Web App มาใส่ตรงนี้ (ห้ามลืมเครื่องหมาย " หน้าและหลัง)
     var GAS_URL = "https://script.google.com/macros/s/AKfycbwyx7wTCYGi7g0Rc5uZhT0RJxbPKMZK8UtLjwYtGx8zJ70x14bSP_rt2efqxujSscZa/exec";
 
+    // ===== 📡 GPS Refresh — แก้ปัญหา Android GPS คลาดเคลื่อน =====
+    // ดึง GPS ใหม่ก่อนส่งข้อมูลทุกครั้ง + retry สูงสุด 3 รอบเพื่อหา fix ที่แม่นยำ
+    function refreshGPS() {
+      return new Promise(function(resolve, reject) {
+        var bestResult = null;
+        var attempts = 0;
+        var maxAttempts = 3;
+
+        function tryGetPosition() {
+          attempts++;
+          navigator.geolocation.getCurrentPosition(
+            function(pos) {
+              var accuracy = pos.coords.accuracy; // หน่วยเมตร
+              bestResult = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+                accuracy: accuracy
+              };
+
+              // ถ้า accuracy ดีพอ (≤ 50m) ยอมรับทันที
+              if (accuracy <= 50) {
+                loc = bestResult;
+                resolve(bestResult);
+                return;
+              }
+
+              // ถ้ายังไม่แม่นพอ และยังไม่หมดรอบ → ลองอีกรอบ
+              if (attempts < maxAttempts) {
+                setTimeout(tryGetPosition, 1500); // รอ 1.5 วิ ก่อน retry
+              } else {
+                // หมดรอบแล้ว — ใช้ค่าที่ดีที่สุดที่ได้ (ถ้า ≤ 100m ยอมรับ)
+                if (bestResult.accuracy <= 100) {
+                  loc = bestResult;
+                  resolve(bestResult);
+                } else {
+                  // accuracy แย่มาก แต่ก็ส่งไปให้ backend ตัดสินใจ (มี fallback radius)
+                  loc = bestResult;
+                  resolve(bestResult);
+                }
+              }
+            },
+            function(err) {
+              if (attempts < maxAttempts) {
+                setTimeout(tryGetPosition, 1500);
+              } else if (bestResult) {
+                loc = bestResult;
+                resolve(bestResult);
+              } else {
+                reject(new Error("ไม่สามารถรับตำแหน่ง GPS ได้ กรุณาเปิด Location แล้วลองใหม่"));
+              }
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+          );
+        }
+
+        tryGetPosition();
+      });
+    }
+
     // ===== Init =====
     async function init() {
       startLiveClock();
@@ -1611,42 +1670,62 @@
       document.getElementById(previewId).src = "";
     }
 
-    function submitData(type) {
+    async function submitData(type) {
       if (!loc)              { showToast("ไม่พบ GPS — กรุณาเปิดตำแหน่งที่ตั้ง", "error"); return; }
       if (!imageB64.checkin) { showToast("กรุณาถ่ายภาพก่อนบันทึก", "error"); return; }
       
-      // --- แก้ไข: เปลี่ยนข้อความปุ่มตามที่คุณต้องการ ---
+      // --- ล็อกปุ่มและแสดงสถานะ ---
       var btnId = (type === 'เข้างาน') ? 'btnIn' : 'btnOut';
       var btn = document.getElementById(btnId);
       var originalText = btn.innerText;
       
-      btn.innerText = "กำลังบันทึกและตรวจสอบ...";
-      btn.disabled = true; // ล็อกปุ่มไว้กันพนักงานกดส่งรูปซ้ำ
-      // ------------------------------------------
+      btn.innerText = "📡 กำลังตรวจสอบตำแหน่ง...";
+      btn.disabled = true;
 
-      sendPayload({
-        userId:           profile.userId,
-        displayName:      profile.displayName,
-        lat:              loc.lat,
-        lng:              loc.lng,
-        imageB64:         imageB64.checkin,
-        photoTimestamp:   lastPhotoTimestamp.checkin,
-        type:             type
-      }, btn, originalText); // ส่งตัวแปรปุ่มไปด้วยเพื่อจะได้คืนค่าให้ตอนเสร็จ
+      try {
+        // ⭐ ดึง GPS ใหม่ทุกครั้งก่อนส่ง — แก้ปัญหา Android GPS เพี้ยน
+        await refreshGPS();
+        
+        btn.innerText = "กำลังบันทึกและตรวจสอบ...";
+
+        sendPayload({
+          userId:           profile.userId,
+          displayName:      profile.displayName,
+          lat:              loc.lat,
+          lng:              loc.lng,
+          accuracy:         loc.accuracy || null,
+          imageB64:         imageB64.checkin,
+          photoTimestamp:   lastPhotoTimestamp.checkin,
+          type:             type
+        }, btn, originalText);
+      } catch (e) {
+        btn.innerText = originalText;
+        btn.disabled = false;
+        showToast(e.message || "GPS ผิดพลาด กรุณาลองใหม่", "error");
+      }
     }
 
-    function submitSpotCheck() {
+    async function submitSpotCheck() {
       if (!loc)           { showToast("ไม่พบ GPS", "error"); return; }
       if (!imageB64.spot) { showToast("ถ่ายภาพก่อนส่ง", "error"); return; }
-      sendPayload({
-        userId:           profile.userId,
-        displayName:      profile.displayName,
-        lat:              loc.lat,
-        lng:              loc.lng,
-        imageB64:         imageB64.spot,
-        photoTimestamp:   lastPhotoTimestamp.spot,
-        type:             'spot_check'
-      });
+
+      try {
+        // ⭐ ดึง GPS ใหม่ก่อนส่ง Spot Check
+        await refreshGPS();
+
+        sendPayload({
+          userId:           profile.userId,
+          displayName:      profile.displayName,
+          lat:              loc.lat,
+          lng:              loc.lng,
+          accuracy:         loc.accuracy || null,
+          imageB64:         imageB64.spot,
+          photoTimestamp:   lastPhotoTimestamp.spot,
+          type:             'spot_check'
+        });
+      } catch (e) {
+        showToast(e.message || "GPS ผิดพลาด กรุณาลองใหม่", "error");
+      }
     }
 
     function submitIssue() {
