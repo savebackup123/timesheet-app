@@ -464,6 +464,114 @@
     }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
+    /* --- Sick Leave OT Refund Styles --- */
+    .btn-refund-ot {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(79, 158, 255, 0.25));
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #f3e8ff;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 10px rgba(168, 85, 247, 0.25);
+      transition: all 0.2s ease;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      font-family: inherit;
+    }
+    .btn-refund-ot:active {
+      transform: scale(0.96);
+    }
+    .refund-badge-done {
+      font-size: 11px;
+      color: var(--accent2);
+      background: rgba(126, 200, 160, 0.12);
+      border: 1px solid rgba(126, 200, 160, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      word-break: keep-all;
+    }
+    .proof-badge-link {
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(79, 158, 255, 0.12);
+      border: 1px solid rgba(79, 158, 255, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+      word-break: keep-all;
+      font-family: inherit;
+    }
+    .proof-badge-link:active {
+      transform: scale(0.96);
+    }
+    .refund-rule-box {
+      background: rgba(22, 26, 35, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .refund-rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-top: 4px;
+      color: #cbd5e1;
+    }
+    .refund-warning-banner {
+      background: rgba(245, 166, 35, 0.15);
+      border: 1px solid rgba(245, 166, 35, 0.4);
+      color: #fde047;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 16px;
+    }
+    .proof-upload-btn {
+      width: 100%;
+      background: rgba(30, 36, 51, 0.6);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .proof-upload-btn:active {
+      transform: scale(0.98);
+      background: rgba(42, 48, 64, 0.8);
+    }
+
     /* --- Announcement & Dashboard Styles --- */
     .announcement-card {
       background: rgba(22, 26, 35, 0.45);
@@ -814,6 +922,80 @@
       <button class="btn btn-primary" onclick="closeSummaryModal()">ตกลง (ปิดหน้าต่าง)</button>
     </div>
   </div>
+
+  <!-- Modal แนบหลักฐานขอคืนสิทธิ์ OT ลาป่วย (1-5 รูป) -->
+  <div class="modal-overlay" id="refundProofModal">
+    <div class="modal-box" style="max-width: 380px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span>💊 ขอคืนสิทธิ์ OT ลาป่วย</span>
+        <button type="button" onclick="closeRefundModal()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; padding:4px;">✕</button>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span style="color:var(--text-muted);">วันที่ลาป่วย:</span>
+          <span id="refundModalDate" style="font-weight:500;">-</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+          <span style="color:var(--text-muted);">จำนวนวันลา:</span>
+          <span><span id="refundModalDays" style="font-weight:600; color:var(--warn);">-</span> วัน</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-top:1px dashed rgba(255,255,255,0.1); padding-top:6px; margin-top:4px;">
+          <span style="color:var(--text-muted);">คืนสิทธิ์ OT อัตโนมัติ:</span>
+          <span style="font-weight:700; color:var(--accent2); font-size:13px;">+<span id="refundModalHours">-</span> ชม.</span>
+        </div>
+      </div>
+
+      <!-- ข้อความเตือนกรณีลาเกิน 3 วัน -->
+      <div id="refundWarningBox" class="refund-warning-banner" style="display:none;"></div>
+
+      <!-- กล่องระเบียบหลักฐานที่ยอมรับ -->
+      <div class="refund-rule-box">
+        <div style="font-weight:600; color:#93c5fd; margin-bottom:6px; display:flex; align-items:center; gap:5px;">
+          <span>📋 หลักฐานที่ยอมรับ (แนบ 1 - 5 รูป):</span>
+        </div>
+        <div class="refund-rule-item"><span>1.</span> <span>ใบเสร็จค่ายา</span></div>
+        <div class="refund-rule-item"><span>2.</span> <span>ซองยาที่ใช้แล้ว (มีระบุชื่อยา/ชื่อผู้ป่วย)</span></div>
+        <div class="refund-rule-item"><span>3.</span> <span>หลักฐานการเข้าพบแพทย์ หรือ ใบรับรองแพทย์</span></div>
+        <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.08); font-size:11px; color:#facc15;">
+          ⚡ <strong>ระบบจะคืน OT ให้อัตโนมัติทันที</strong> หลังได้รับหลักฐาน แอดมินจะตรวจสอบรูปภาพในภายหลัง
+        </div>
+      </div>
+
+      <!-- ช่องอัปโหลดรูปภาพ -->
+      <input type="file" id="refundProofInput" accept="image/*" multiple style="display:none;" onchange="handleRefundProofImages(event)">
+      <button type="button" class="proof-upload-btn" onclick="triggerRefundFileInput()">
+        <span>📷 แตะเพื่อถ่ายภาพหรือเลือกรูปภาพ</span>
+      </button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:var(--text-muted);">
+        <span>รูปภาพที่แนบ:</span>
+        <span><strong id="refundImgCount" style="color:var(--accent); font-size:13px;">0</strong> / 5 รูป (ขั้นต่ำ 1 รูป)</span>
+      </div>
+
+      <div class="proof-grid" id="refundPreviewGrid"></div>
+
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+        <button type="button" id="btnSubmitRefund" class="btn btn-primary" onclick="submitRefundSickLeave()" disabled>
+          ส่งหลักฐาน & คืนสิทธิ์ OT ทันที 🚀
+        </button>
+        <button type="button" class="btn btn-ghost" onclick="closeRefundModal()">ย้อนกลับ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal สำหรับดูรูปภาพหลักฐานเดิม -->
+  <div class="modal-overlay" id="proofViewerModal">
+    <div class="modal-box" style="max-width: 380px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span>🔍 รูปหลักฐานที่แนบไว้</span>
+        <button type="button" onclick="closeProofViewer()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; padding:4px;">✕</button>
+      </div>
+      <div id="proofViewerList" style="margin: 12px 0;"></div>
+      <button type="button" class="btn btn-ghost" onclick="closeProofViewer()">ปิดหน้าต่าง</button>
+    </div>
+  </div>
+
 
   <div class="header">
     <div class="header-avatar" id="headerAvatar">👤</div>
@@ -1786,6 +1968,208 @@
       });
     }
 
+    // ===== 💊 ระบบขอคืนสิทธิ์ OT ลาป่วย (แนบหลักฐาน 1-5 รูป) =====
+    var refundImages = [];
+    var currentRefundLeaveRow = null;
+    var currentRefundDays = 1;
+
+    function openRefundSickLeaveModal(row, start, end, days) {
+      currentRefundLeaveRow = row;
+      currentRefundDays = days || 1;
+      refundImages = [];
+
+      document.getElementById('refundModalDate').textContent = start + (end !== start ? ' ถึง ' + end : '');
+      document.getElementById('refundModalDays').textContent = days;
+      document.getElementById('refundModalHours').textContent = Math.round(days * 8);
+
+      var alertBox = document.getElementById('refundWarningBox');
+      if (days > 3) {
+        alertBox.style.display = 'block';
+        alertBox.innerHTML = '⚠️ <strong>รายการนี้ลาเกิน 3 วัน (' + days + ' วัน):</strong> ตามระเบียบข้อกำหนด หลักฐานจะต้องเป็น <u>ใบรับรองแพทย์ชั้น 1 หรือจากโรงพยาบาลรัฐ</u> เท่านั้นครับ';
+      } else {
+        alertBox.style.display = 'none';
+      }
+
+      renderRefundPreviews();
+      document.getElementById('refundProofModal').classList.add('active');
+    }
+
+    function closeRefundModal() {
+      document.getElementById('refundProofModal').classList.remove('active');
+      refundImages = [];
+      currentRefundLeaveRow = null;
+    }
+
+    function triggerRefundFileInput() {
+      if (refundImages.length >= 5) {
+        showToast("แนบครบ 5 รูปแล้วครับ หากต้องการเปลี่ยนรูปให้กดกากบาท (✕) เพื่อลบก่อน", "warning");
+        return;
+      }
+      var inp = document.getElementById('refundProofInput');
+      inp.value = "";
+      inp.click();
+    }
+
+    function handleRefundProofImages(e) {
+      var files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      var remainingSlots = 5 - refundImages.length;
+      if (remainingSlots <= 0) {
+        showToast("แนบรูปได้สูงสุด 5 รูปครับ", "warning");
+        return;
+      }
+
+      if (files.length > remainingSlots) {
+        showToast("คุณสามารถเพิ่มรูปได้อีกเพียง " + remainingSlots + " รูป (ระบบเลือก " + remainingSlots + " รูปแรกให้ครับ)", "warning");
+        files = files.slice(0, remainingSlots);
+      }
+
+      showLoading("กำลังประมวลผลรูปภาพ...");
+      var promises = files.map(function(file) {
+        return new Promise(function(resolve) {
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            var img = new Image();
+            img.onload = function() {
+              var MAX_W = 1000;
+              var scale = Math.min(1, MAX_W / img.width);
+              var canvas = document.createElement('canvas');
+              canvas.width = Math.round(img.width * scale);
+              canvas.height = Math.round(img.height * scale);
+              canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+              var b64 = canvas.toDataURL('image/jpeg', 0.75);
+              resolve(b64);
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(promises).then(function(b64List) {
+        hideLoading();
+        b64List.forEach(function(b64) {
+          if (refundImages.length < 5) {
+            refundImages.push(b64);
+          }
+        });
+        renderRefundPreviews();
+      }).catch(function() {
+        hideLoading();
+        showToast("เกิดข้อผิดพลาดในการประมวลผลรูปภาพ", "error");
+      });
+    }
+
+    function removeRefundImage(idx) {
+      if (idx >= 0 && idx < refundImages.length) {
+        refundImages.splice(idx, 1);
+        renderRefundPreviews();
+      }
+    }
+
+    function renderRefundPreviews() {
+      var grid = document.getElementById('refundPreviewGrid');
+      var countEl = document.getElementById('refundImgCount');
+      var submitBtn = document.getElementById('btnSubmitRefund');
+
+      countEl.textContent = refundImages.length;
+
+      if (refundImages.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1 / -1; font-size:12px; color:var(--text-muted); text-align:center; padding:16px 8px; border:1px dashed rgba(255,255,255,0.15); border-radius:10px;">ยังไม่มีรูปที่แนบ — แตะปุ่มด้านบนเพื่อเลือกรูปหลักฐาน (1 - 5 รูป)</div>';
+        submitBtn.disabled = true;
+        submitBtn.classList.remove('pulse-glow');
+      } else {
+        var html = '';
+        refundImages.forEach(function(b64, i) {
+          html += '<div style="position:relative; width:100%; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.15); background:#000;">'
+                + '<img src="' + b64 + '" style="width:100%; height:100%; object-fit:cover;">'
+                + '<button type="button" onclick="removeRefundImage(' + i + ')" style="position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(224,92,92,0.9); color:#fff; border:none; border-radius:50%; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer;">✕</button>'
+                + '</div>';
+        });
+        grid.innerHTML = html;
+        submitBtn.disabled = false;
+        submitBtn.classList.add('pulse-glow');
+      }
+    }
+
+    function submitRefundSickLeave() {
+      if (!currentRefundLeaveRow) {
+        showToast("ไม่พบข้อมูลรายการลา", "error");
+        return;
+      }
+      if (!refundImages || refundImages.length === 0) {
+        showToast("กรุณาแนบรูปหลักฐานอย่างน้อย 1 รูป", "error");
+        return;
+      }
+
+      var submitBtn = document.getElementById('btnSubmitRefund');
+      var origText = submitBtn.innerText;
+      submitBtn.innerText = "กำลังส่งหลักฐานและคืนสิทธิ์...";
+      submitBtn.disabled = true;
+      showLoading("กำลังส่งหลักฐานและคืนสิทธิ์ OT ทันที...");
+
+      fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          userId: profile.userId,
+          displayName: profile.displayName,
+          type: 'refund_sick_leave_ot',
+          leaveRow: currentRefundLeaveRow,
+          images: refundImages
+        })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        hideLoading();
+        submitBtn.innerText = origText;
+        submitBtn.disabled = false;
+
+        if (res.success) {
+          closeRefundModal();
+          if (res.summaryAlert) {
+            document.getElementById('summaryModalText').textContent = res.summaryAlert;
+            document.getElementById('summaryModal').classList.add('active');
+          } else {
+            showToast(res.message, "success");
+          }
+
+          if (res.newOTHours !== undefined) {
+            document.getElementById('otVal').textContent = res.newOTHours;
+          }
+
+          openLeaveSection();
+        } else {
+          showToast(res.message || "เกิดข้อผิดพลาดในการคืนสิทธิ์", "error");
+        }
+      }).catch(function(err) {
+        hideLoading();
+        submitBtn.innerText = origText;
+        submitBtn.disabled = false;
+        showToast("ระบบขัดข้องหรือสัญญาณเน็ตไม่ดี กรุณาลองใหม่ครับ ❌", "error");
+      });
+    }
+
+    function viewEvidenceImages(urls) {
+      if (!urls || !urls.length) {
+        showToast("ไม่พบรูปหลักฐาน", "error");
+        return;
+      }
+      var container = document.getElementById('proofViewerList');
+      var html = '';
+      urls.forEach(function(url, idx) {
+        html += '<div style="margin-bottom:12px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.15);">'
+              + '<img src="' + url + '" style="width:100%; display:block; object-fit:contain; max-height:280px; background:#000;">'
+              + '<div style="padding:6px 10px; font-size:11px; color:var(--text-muted); background:rgba(0,0,0,0.5); text-align:center;">รูปหลักฐานที่ ' + (idx + 1) + '</div>'
+              + '</div>';
+      });
+      container.innerHTML = html;
+      document.getElementById('proofViewerModal').classList.add('active');
+    }
+
+    function closeProofViewer() {
+      document.getElementById('proofViewerModal').classList.remove('active');
+    }
+
     function openLeaveSection() {
       showLoading("กำลังโหลดข้อมูลสิทธิและการลา...");
       fetch(GAS_URL, {
@@ -1806,7 +2190,38 @@
           if (res.leaveHistory && res.leaveHistory.length > 0) {
             res.leaveHistory.forEach(function(item) {
               var sColor = item.status === 'อนุมัติ' ? 'var(--accent2)' : item.status === 'รอตรวจสอบ' ? 'var(--warn)' : 'var(--danger)';
-              listHtml += '<div class="history-card" style="padding:12px 14px;"><div class="history-left"><div class="history-action">' + item.type + ' <span style="font-size:12px;color:var(--text-muted);font-weight:normal;">(' + item.days + ' วัน)</span></div><div class="history-date">' + item.start + ' - ' + item.end + '</div></div><div class="history-right"><div class="history-status" style="color:' + sColor + ';border:1px solid ' + sColor + ';background:transparent;">' + item.status + '</div></div></div>';
+              
+              var refundActionHtml = '';
+              if (item.canRefundOT) {
+                var refundHours = Math.round(item.days * 8);
+                refundActionHtml = '<div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">'
+                  + '<span style="font-size:11px; color:#facc15;">⏱️ หักโอที (' + refundHours + ' ชม.)</span>'
+                  + '<button type="button" class="btn-refund-ot" onclick="openRefundSickLeaveModal(' + item.row + ', \'' + item.start + '\', \'' + item.end + '\', ' + item.days + ')">'
+                  + '💊 แนบหลักฐานขอคืน OT (1-5 รูป)'
+                  + '</button>'
+                  + '</div>';
+              } else if (item.isRefunded) {
+                var proofBtn = (item.evidenceUrls && item.evidenceUrls.length > 0)
+                  ? '<button type="button" class="proof-badge-link" onclick=\'viewEvidenceImages(' + JSON.stringify(item.evidenceUrls) + ')\'>🔍 ดูรูป (' + item.evidenceUrls.length + ')</button>'
+                  : '';
+                refundActionHtml = '<div style="margin-top:10px; padding-top:8px; border-top:1px dashed rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">'
+                  + '<span class="refund-badge-done">✨ คืนสิทธิ์ OT แล้ว (รอแอดมินตรวจรูป)</span>'
+                  + proofBtn
+                  + '</div>';
+              }
+
+              listHtml += '<div class="history-card" style="padding:12px 14px;">'
+                        + '<div style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">'
+                        + '<div class="history-left">'
+                        + '<div class="history-action">' + item.type + ' <span style="font-size:12px;color:var(--text-muted);font-weight:normal;">(' + item.days + ' วัน)</span></div>'
+                        + '<div class="history-date">' + item.start + ' - ' + item.end + '</div>'
+                        + '</div>'
+                        + '<div class="history-right">'
+                        + '<div class="history-status" style="color:' + sColor + ';border:1px solid ' + sColor + ';background:transparent;">' + item.status + '</div>'
+                        + '</div>'
+                        + '</div>'
+                        + refundActionHtml
+                        + '</div>';
             });
           } else { listHtml = '<div style="font-size:12px;color:var(--text-muted);text-align:center;">ยังไม่มีประวัติการลางาน</div>'; }
           document.getElementById('leaveHistoryList').innerHTML = listHtml;
